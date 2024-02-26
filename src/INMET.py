@@ -6,22 +6,20 @@ import requests
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait, Select
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
 
 
-
-from bs4 import BeautifulSoup
-
+diretorio_dados = "./data/"
 
 #Endereco do driver do browser 
 folder_chrome_driver='./drive selenium/chromedriver.exe'
 
 #Para desabilitar a abertura de uma nova janela do browser pelo Selenium
 chrome_options = Options()
-chrome_options.add_argument("--headless")
+# chrome_options.add_argument("--headless")
+chrome_options.add_experimental_option("prefs", {
+    "download.default_directory": os.path.abspath(diretorio_dados)
+})
 
 
 VALOR_ESTACAO='A559' #Januária - MG
@@ -30,7 +28,8 @@ DATA_INIT='22/11/2023'
 DATA_END='22/01/2024'
 
 
-browser = webdriver.Chrome()
+# browser = webdriver.Chrome(executable_path='./drive selenium/chromedriver.exe')
+browser = webdriver.Chrome(options=chrome_options)
 browser.get(f'https://tempo.inmet.gov.br/TabelaEstacoes/{VALOR_ESTACAO}')
 
 time.sleep(3)
@@ -62,20 +61,14 @@ time.sleep(3)
 # baixando o csv com os dados
 botao_download   = browser.find_element(By.XPATH,'//*[@id="root"]/div[2]/div[2]/div/div/div/span/a')
 
-path_file = f'./data/base_{VALOR_ESTACAO}_{DATA_INIT}_{DATA_END}'
-
 browser.execute_script("arguments[0].setAttribute('download', '{}')".format(f'base_{VALOR_ESTACAO}_{DATA_INIT}_{DATA_END}'), botao_download)
 botao_download.click()
 
 time.sleep(3)
 
-# Espere até que o arquivo seja baixado
-while not os.path.exists(path_file):
-    pass
 
 # Feche o navegador
 browser.quit()
-
 
 
 
