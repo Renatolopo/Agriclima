@@ -8,7 +8,21 @@ O Agriclima consiste em um conjunto de scripts Python que fazem a coleta de dado
 
 ## Como Funciona
 
-O projeto conta com um script principal, `ANA.py`, que realiza a coleta de dados climáticos de acordo com os parâmetros especificados, como intervalo de datas, tipo de dado e nível de consistência. Atualmente, o foco está na coleta de dados de chuva, mas o projeto ainda está em desenvolvimento
+O projeto conta com 2 script principal, `ANA.py` e `INMET.py`, que realiza a coleta de dados climáticos de acordo com os parâmetros especificados, como intervalo de datas, tipo de dado e nível de consistência. Atualmente, o foco está na coleta de dados de chuva, mas o projeto ainda está em desenvolvimento
+
+### Sobre os script: 
+#### INMET.py
+No script tem o codigo da estação, que está com o valor de Januária, mas pode ser alterado. Além disso também pode ser definido o intervalo de data dos dados, porém os intervalos podem ter no maximo 6 meses.  Quando esse projeto virar uma aplicação esses valores serão passados como parametros.
+
+```python
+VALOR_ESTACAO='A559' #Januária - MG
+
+DATA_INIT='22/11/2023'
+DATA_END='22/01/2024'
+
+```
+
+Após configurado esses campos basta executar o script que o arquivo de exportação estara no diretorio ‘./data’ como .csv com o nome seguindo essa estrutura `base_{VALOR_ESTACAO}_{DATA_INIT}_{DATA_END}` baseado nos valores das variáveis que foram ajustadas no inicio.
 
 ## Requisitos
 

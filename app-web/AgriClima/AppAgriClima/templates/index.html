@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriClima</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}">
+    <link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/light/main.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="navbar">
+            <h1 class="navbar-brand">AgriClima</h1>
+            <ul class="navbar-menu">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Sobre</a></li>
+                <li><a href="#">Documentação</a></li>
+                <li><a href="#">Sair</a></li>
+            </ul>
+        </div>
+    
+        <div class="content">
+            <!-- Conteúdo da página aqui -->
+            <h1>Título da Página</h1>
+            <p>Conteúdo da página vai aqui...</p>
+
+            <div id="map"></div>
+        </div>
+    </div>
+
+    
+    <script src="https://js.arcgis.com/4.25/?apikey=AAPK47cc3704fc9948289ac345a99453ab43trNNKSVktYPBobA1eSYl5dzwZsIlvgu0Ktd74C9vHHxAjOASD-Uw0tIG0_849tJd"></script>
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/widgets/BasemapToggle",
+            "dojo/domReady!"
+        ], function(Map, MapView, BasemapToggle) {
+            var map = new Map({
+                basemap: "streets-navigation-vector"
+            });
+    
+            var view = new MapView({
+                container: "map", // ID do contêiner
+                map: map,
+                center: [-51.9253, -14.2350],
+                zoom: 4
+            });
+    
+            var basemapToggle = new BasemapToggle({
+                view: view,
+                nextBasemap: "satellite"
+            });
+    
+            view.ui.add(basemapToggle, "bottom-right");
+        });
+    </script>
+    
+
+</body>
+</html>
