@@ -26,39 +26,88 @@
             <h1>Título da Página</h1>
             <p>Conteúdo da página vai aqui...</p>
 
-            <div id="map"></div>
+            
         </div>
+
+        <div class="form-container">
+            <h2>Selecione o Município</h2>
+            <div id="map"></div>
+            <form action="#" method="post">
+                <div class="form-group">
+                    <label for="municipio">Município:</label>
+                    <input type="text" id="municipio" name="municipio" placeholder="Digite o nome do município" required>
+                </div>
+                <div class="form-group">
+                    <label for="data_inicio">Data de Início:</label>
+                    <input type="date" id="data_inicio" name="data_inicio" required>
+                </div>
+                <div class="form-group">
+                    <label for="data_fim">Data de Fim:</label>
+                    <input type="date" id="data_fim" name="data_fim" required>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Enviar">
+                </div>
+            </form>
+        </div>
+
     </div>
 
     
-    <script src="https://js.arcgis.com/4.25/?apikey=AAPK47cc3704fc9948289ac345a99453ab43trNNKSVktYPBobA1eSYl5dzwZsIlvgu0Ktd74C9vHHxAjOASD-Uw0tIG0_849tJd"></script>
+        <!-- Leaflet.js CDN -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
     <script>
-        require([
-            "esri/Map",
-            "esri/views/MapView",
-            "esri/widgets/BasemapToggle",
-            "dojo/domReady!"
-        ], function(Map, MapView, BasemapToggle) {
-            var map = new Map({
-                basemap: "streets-navigation-vector"
-            });
-    
-            var view = new MapView({
-                container: "map", // ID do contêiner
-                map: map,
-                center: [-51.9253, -14.2350],
-                zoom: 4
-            });
-    
-            var basemapToggle = new BasemapToggle({
-                view: view,
-                nextBasemap: "satellite"
-            });
-    
-            view.ui.add(basemapToggle, "bottom-right");
+        var map = L.map('map').setView([-15.0830, -44.1600], 9);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Adiciona um evento de clique ao mapa para obter o nome do município
+        map.on('click', function(e) {
+            var latlng = e.latlng;
+            var latitude = latlng.lat.toFixed(6);
+            var longitude = latlng.lng.toFixed(6);
+
+            // Requisição para o serviço de geocodificação Nominatim para obter o nome do município
+            var url = 'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + latitude + '&lon=' + longitude + '&zoom=18&addressdetails=1';
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    var municipio = data.address.city || data.address.town || data.address.village || data.address.municipality;
+                    document.getElementById('municipio').value = municipio;
+                })
+                .catch(error => console.error('Erro:', error));
+        });
+
+        // Adiciona um evento de mouseover para o texto do município
+        map.on('mouseover', function(e) {
+            var layer = e.layer;
+
+            if (layer instanceof L.Marker) {
+                layer.bindTooltip(layer.options.name, {permanent: true}).openTooltip();
+                layer.getElement().style.cursor = 'pointer'; // Altera o cursor para pointer
+                layer.getElement().style.color = '#007bff'; // Altera a cor do texto para azul
+            }
+        });
+
+        // Adiciona um evento de mouseout para o texto do município
+        map.on('mouseout', function(e) {
+            var layer = e.layer;
+
+            if (layer instanceof L.Marker) {
+                layer.unbindTooltip();
+                layer.getElement().style.cursor = 'default'; // Restaura o cursor para o padrão
+                layer.getElement().style.color = '#000'; // Restaura a cor do texto para preto
+            }
         });
     </script>
+
     
+    
+  
 
 </body>
 </html>
