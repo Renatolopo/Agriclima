@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-v*6wrdh45=gi6^qwligi=i!1+7m)!tfp3ojd36fpgj%vsg5w^a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['renatolopo.pythonanywhere.com', '127.0.0.1']
 
 
 # Application definition
@@ -121,7 +121,8 @@ STATIC_URL = "AppAgriClima/static/"
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'AppAgriClima/static/'),
 ]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = '/home/renatolopo/AgriClima/static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

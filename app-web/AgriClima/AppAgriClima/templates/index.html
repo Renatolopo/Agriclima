@@ -23,36 +23,33 @@
     
         <div class="content">
             <!-- Conteúdo da página aqui -->
-            <h1>Título da Página</h1>
-            <p>Conteúdo da página vai aqui...</p>
+            <h1>Séries Históricas de Estações</h1>
+            <p>Selecione uma estação no mapa abaixo para fazer download</p>
 
             
         </div>
 
-        <div class="form-container">
-            <h2>Selecione o a  Estação</h2>
+        <div id="map-container">
             <div id="map"></div>
-            <form action="#" method="post">
-                <div class="form-group">
-                    <label for="nome-estacao">Nome da Estação:</label>
-                    <input type="text" id="nome-estacao" name="nome-estacao" placeholder="Digite o nome da Estação" required>
+            <div id="modal-overlay">
+                <div class="form-modal">
+                    <h2>Selecione a Estação</h2>
+                    <form action="#" method="post">
+                        <div class="form-group">
+                            <label for="nome-estacao">Nome da Estação</label>
+                            <input type="text" id="nome-estacao" name="nome-estacao" placeholder="Digite o nome da Estação" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cod-estacao">Código da Estação</label>
+                            <input type="text" id="cod-estacao" name="cod-estacao" placeholder="Digite o código da Estação" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" value="Buscar">
+                        </div>
+                    </form>
                 </div>
-                <div class="form-group">
-                    <label for="cod-estacao">Código da Estação:</label>
-                    <input type="text" id="cod-estacao" name="cod-estacao" placeholder="Digite o código da Estação" required>
-                </div>
-                <div class="form-group">
-                    <label for="data_inicio">Data de Início:</label>
-                    <input type="date" id="data_inicio" name="data_inicio" required>
-                </div>
-                <div class="form-group">
-                    <label for="data_fim">Data de Fim:</label>
-                    <input type="date" id="data_fim" name="data_fim" required>
-                </div>
-                <div class="form-group">
-                    <input type="submit" value="Enviar">
-                </div>
-            </form>
+            </div>
+            
         </div>
 
     </div>

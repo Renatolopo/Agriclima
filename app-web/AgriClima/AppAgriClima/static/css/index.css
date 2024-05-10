@@ -62,6 +62,7 @@ body {
 
 .content {
     padding: 20px;
+    text-align: center;
 }
 
 
@@ -111,3 +112,81 @@ h2 {
     background-color: #0056b3;
 }
 
+
+
+#map-container {
+    position: relative;
+    height: 800px; /* Aumentando o tamanho do mapa */
+    margin-bottom: 20px;
+}
+
+#map {
+    height: 100%;
+    width: 80%; /* Definindo a largura do mapa */
+    float: right; /* Movendo o mapa para a direita */
+}
+
+#modal-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 20%; /* Definindo a largura do modal */
+    height: 100%;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.form-modal {
+    max-width: 80%; /* Definindo a largura do formulário dentro do modal */
+    padding: 20px;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    z-index: 10000;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"] {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    margin-top: 5px;
+}
+
+.form-group input[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: block;
+    margin: auto;
+}
+
+.form-group input[type="submit"]:hover {
+    background-color: #0056b3;
+}
