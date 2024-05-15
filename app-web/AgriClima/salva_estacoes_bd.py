@@ -1,30 +1,38 @@
-
-import os
 import sys
-from django.conf import settings
+import csv
+import os
 
-# Adicione o diretório do projeto ao sys.path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Adicione o caminho do seu projeto ao sys.path
+caminho_projeto = './AgriClima'
+sys.path.append(caminho_projeto)
 
-# Configurar as configurações do Django
+# Importe o shell do Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'AgriClima.settings')
-settings.configure()
-
-# Importar e configurar o Django após a configuração
 import django
 django.setup()
 
-import pandas as pd
-import csv
 from AppAgriClima.models import Estacao
 
+def popular_tabela_com_csv(nome_arquivo):
+    with open(nome_arquivo, 'r') as arquivo_csv:
+        leitor_csv = csv.reader(arquivo_csv)
+        # Ignorar o cabeçalho se houver
+        next(leitor_csv)
+        for linha in leitor_csv:
+            # Supondo que a ordem das colunas no CSV seja a mesma que a ordem dos campos no modelo
+            id, nome, codigo, tipo_estacao, latitude,longitude, fonte = linha
+            
+            # Criar uma nova instância do modelo Estacao
+            nova_estacao = Estacao(
+                codigo=codigo,
+                nome=nome,
+                latitude=latitude,
+                longitude=longitude,
+                tipoEstacao=tipo_estacao,
+                fonte=fonte
+            )
+            # Salvar a instância no banco de dados
+            nova_estacao.save()
 
-def carregar_dados_csv():
-    with open('../../data/Estacao_tratada.csv', 'r', encoding='latin-1') as f:
-        reader = csv.reader(f)
-        next(reader)  # Ignorar cabeçalho
-        for row in reader:
-            x , codigo, nome, latitude, longitude, tipoEstacao = row
-            Estacao.objects.create(codigo=codigo, nome=nome, latitude=latitude, longitude=longitude, tipoEstacao=tipoEstacao)
-            Estacao.save()
-carregar_dados_csv()
+# Chamada da função para popular a tabela com o arquivo CSV
+popular_tabela_com_csv('../../data/Estacao_tratada.csv', )

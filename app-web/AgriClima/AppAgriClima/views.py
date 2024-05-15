@@ -10,9 +10,9 @@ def index(request):
 
 
 def get_estacoes(request):
-    estacoes = Estacao.objects.all().values('nome', 'codigo', 'latitude', 'longitude', 'tipoEstacao')
+    estacoes = Estacao.objects.all().values('nome', 'codigo', 'latitude', 'longitude', 'tipoEstacao', 'fonte')
     # estacoes = Estacao.objects.all()
-    print(estacoes)
+    # print(estacoes)
     return JsonResponse(list(estacoes), safe=False)
 
 

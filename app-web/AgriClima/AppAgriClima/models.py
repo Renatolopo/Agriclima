@@ -7,9 +7,14 @@ class Estacao(models.Model):
     latitude = models.CharField(max_length=100)
     longitude = models.CharField(max_length=100)
     tipoEstacao = models.CharField(max_length=100)
+    fonte = models.CharField(max_length=100, default= 'null')
 
     class Meta:
         app_label = 'AppAgriClima'
 
     def __str__(self):
         return self.nome
+    
+
+
+ 
