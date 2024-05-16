@@ -14,14 +14,15 @@ function addMarkers(estacoes) {
         var tipoEstacao = estacao.tipoEstacao;
         var fonte = estacao.fonte;
 
-        var fillColor = fonte === 'INMET' ? 'yellow' : 'blue';
+        var fillColor = fonte === 'INMET' ? 'orange' : 'blue';
 
         // Construir o conteúdo do popup
         var popupContent = `
             <b>Nome:</b> ${nome}<br>
             <b>Código:</b> ${codigo}<br>
             <b>Tipo de Estação:</b> ${tipoEstacao}<br>
-            <b>Fonte:</b> ${fonte}
+            <b>Fonte:</b> ${fonte} <br>
+            <b>Coordenadas:</b> ${latitude}, ${longitude}<br>
         `;
 
         // Adicionar o marcador como um círculo com cor base no tipo de estação
