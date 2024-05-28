@@ -59,7 +59,7 @@ def download_station_data(codigo_estacao, diretorio_saida):
                     
                     with zip_file.open(file_name) as csv_file:
                         raw_data = csv_file.read()
-                        decoded_data = raw_data.decode('latin-1')  # Assuming the data is encoded in 'latin-1'
+                        decoded_data = raw_data.decode('latin-1')  
                         lines = decoded_data.split('\n')
                         
                         # Encontrar o índice da linha que começa com "EstacaoCodigo"

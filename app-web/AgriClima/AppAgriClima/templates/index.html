@@ -23,9 +23,7 @@
         <div class="content">
             <!-- Conteúdo da página aqui -->
             <h1>Séries Históricas de Estações</h1>
-            <p>Selecione uma estação no mapa abaixo para fazer download</p>
-
-            
+            <p id="description">Selecione uma estação no mapa abaixo para fazer download</p>
         </div>
 
         <div id="map-container">
@@ -33,25 +31,74 @@
             <div id="modal-overlay">
                 <div class="form-modal">
                     <h2>Selecione a Estação</h2>
-                    <form action="#" method="post">
-                        <div class="form-group">
-                            <label for="nome-estacao">Nome da Estação</label>
-                            <input type="text" id="nome-estacao" name="nome-estacao" placeholder="Digite o nome da Estação" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="cod-estacao">Código da Estação</label>
-                            <input type="text" id="cod-estacao" name="cod-estacao" placeholder="Digite o código da Estação" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="submit" value="Buscar">
-                        </div>
-                    </form>
+                    <div class="search-mode-buttons">
+                        <button id="mode1-btn" class="active" onclick="setSearchMode(1)">Busca padrão</button>
+                        <button id="mode2-btn" onclick="setSearchMode(2)">Busca por Coordenadas</button>
+                    </div>
+                    <div id="form1">
+                        <form action="#" method="post">
+                            <div class="form-group">
+                                <label for="nome-estacao">Nome da Estação</label>
+                                <input type="text" id="nome-estacao" name="nome-estacao" placeholder="Digite o nome da Estação" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cod-estacao">Código da Estação</label>
+                                <input type="text" id="cod-estacao" name="cod-estacao" placeholder="Digite o código da Estação" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Buscar">
+                            </div>
+                        </form>
+                    </div>
+                    <div id="form2" style="display: none;">
+                        <form id="search-coordinates-form" action="#" method="post" onsubmit="return findNearestStations(event)">
+                            <div class="form-group">
+                                <label for="latitude">Latitude</label>
+                                <input type="text" id="latitude" name="latitude" placeholder="Digite a latitude" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="longitude">Longitude</label>
+                                <input type="text" id="longitude" name="longitude" placeholder="Digite a longitude" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Buscar">
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
-            
+        </div>
+
+
+
+
+
+        <!-- Modal para exibir as estações mais próximas -->
+        <div id="nearest-stations-modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2>Estações Mais Próximas</h2>
+                <table id="nearest-stations-table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Código</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Esta área será preenchida dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
         </div>
 
     </div>
+
+
+    
+
 
 
     <!-- Leaflet.js CDN -->
@@ -65,7 +112,7 @@
     <!-- Mapa -->
     <script type="text/javascript" src = "{% static 'js/mapa.js' %}" ></script>
 
-    
+
 
 </body>
 </html>
