@@ -5,6 +5,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 var estacoesData = [];
+var clickMarker; // Variável global para armazenar o marcador de clique
 
 // Função para adicionar marcadores ao mapa
 function addMarkers(estacoes) {
@@ -75,6 +76,15 @@ loadMarkersAsync();
 // Adiciona um evento de clique no mapa para preencher latitude e longitude
 map.on('click', function(e) {
     if (document.getElementById('mode2-btn').classList.contains('active')) {
+         // Remove marcador anterior, se existir
+        if (clickMarker) {
+            map.removeLayer(clickMarker);
+        }
+
+        // Adiciona novo marcador no ponto clicado
+        clickMarker = L.marker(e.latlng).addTo(map);
+
+        // Preenche os campos de latitude e longitude no formulário
         document.getElementById('latitude').value = e.latlng.lat;
         document.getElementById('longitude').value = e.latlng.lng;
     }
@@ -138,8 +148,10 @@ function findNearestStations(event) {
     nearestStations.forEach(function(estacao) {
         var row = document.createElement('tr');
         row.innerHTML = `
+            <td><input type="checkbox" class="station-checkbox" data-nome="${estacao.nome}" data-codigo="${estacao.codigo}" data-fonte="${estacao.fonte}" data-latitude="${estacao.latitude}" data-longitude="${estacao.longitude}"></td>
             <td>${estacao.nome}</td>
             <td>${estacao.codigo}</td>
+            <td>${estacao.fonte}</td>
             <td>${estacao.latitude}</td>
             <td>${estacao.longitude}</td>
         `;
@@ -148,6 +160,15 @@ function findNearestStations(event) {
 
     // Exibe o modal
     document.getElementById('nearest-stations-modal').style.display = 'block';
+
+    // Adiciona o evento de selecionar todos
+    var selectAllCheckbox = document.getElementById('select-all-checkbox');
+    selectAllCheckbox.addEventListener('change', function() {
+        var checkboxes = document.querySelectorAll('.station-checkbox');
+        checkboxes.forEach(function(checkbox) {
+            checkbox.checked = selectAllCheckbox.checked;
+        });
+    });
 }
 
 // Função para fechar o modal

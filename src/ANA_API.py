@@ -87,7 +87,7 @@ def download_station_data(codigo_estacao, diretorio_saida):
         raise Exception(f"Falha ao baixar arquivo. Status code: {response.status_code}")
 
 # Exemplo de uso
-codigo_estacao = '1544038'  # Substitua pelo código da estação desejada
+codigo_estacao = '1544036'  # Substitua pelo código da estação desejada
 diretorio_saida = "./data/saida/"  # Diretório de saída
 output_file_path = download_station_data(codigo_estacao, diretorio_saida)
 print(output_file_path)

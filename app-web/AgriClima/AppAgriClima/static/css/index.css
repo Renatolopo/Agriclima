@@ -1,11 +1,13 @@
-
 body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
 }
-.container {
+
+.container,
+.form-container,
+.form-modal {
     max-width: 80%;
     margin: 0 auto;
     padding: 20px;
@@ -13,124 +15,80 @@ body {
     background-color: white;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
+
+.form-container {
+    max-width: 60%;
+    border-radius: 5px;
+}
+
 .navbar {
     background-color: #1E2A3A;
     overflow: hidden;
     padding: 35px 20px;
     border-radius: 10px 10px 0 0;
 }
+
 .navbar-brand {
     float: left;
     color: white;
     font-size: 24px;
     margin: 0;
 }
+
 .navbar-menu {
     float: right;
     margin: 0;
     padding: 0;
 }
+
 .navbar-menu li {
     display: inline;
     list-style-type: none;
 }
+
 .navbar-menu li a {
     color: white;
     text-decoration: none;
     font-size: 18px;
     padding: 10px 20px;
 }
+
 .navbar-menu li a:hover {
     background-color: #0F1721;
 }
+
 .content {
     padding: 20px;
+    text-align: center;
 }
-
-
 
 #map {
     height: 500px;
     margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    width: 100%; /* Largura do mapa */
-    margin: 0 auto; /* Centraliza o mapa */
+    width: 100%;
+    margin: 0 auto;
     cursor: default;
 }
 
-
-.content {
-    padding: 20px;
-    text-align: center;
-}
-
-
-.form-container {
-    max-width: 60%;
-    margin: 0 auto;
-    padding: 20px;
-    border-radius: 5px;
-    background-color: #fff;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-h2 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 20px;
-}
-.form-group {
-    margin-bottom: 20px;
-}
-.form-group label {
-    display: block;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 5px;
-}
-.form-group input[type="text"],
-.form-group input[type="date"] {
-    width: calc(100% - 20px);
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
-    margin-top: 5px;
-}
-.form-group input[type="submit"] {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    display: block;
-    margin: auto;
-}
-.form-group input[type="submit"]:hover {
-    background-color: #0056b3;
-}
-
-
-
 #map-container {
     position: relative;
-    height: 800px; /* Aumentando o tamanho do mapa */
+    height: 800px;
     margin-bottom: 20px;
 }
 
 #map {
     height: 100%;
-    width: 80%; /* Definindo a largura do mapa */
-    float: right; /* Movendo o mapa para a direita */
+    width: 80%;
+    float: right;
 }
 
 #modal-overlay {
     position: absolute;
     left: 0;
     top: 0;
-    width: 20%; /* Definindo a largura do modal */
+    width: 20%;
     height: 100%;
     background-color: transparent;
     display: flex;
@@ -139,15 +97,6 @@ h2 {
     z-index: 9999;
 }
 
-.form-modal {
-    max-width: 80%; /* Definindo a largura do formulário dentro do modal */
-    padding: 20px;
-    border-radius: 5px;
-    background-color: #fff;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    z-index: 10000;
-}
-
 h2 {
     text-align: center;
     color: #333;
@@ -190,7 +139,6 @@ h2 {
 .form-group input[type="submit"]:hover {
     background-color: #0056b3;
 }
-
 
 /* Estilizando os botões para selecionar o modo de busca */
 .search-mode-buttons {
@@ -221,8 +169,7 @@ h2 {
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
 }
 
-
-/* modal estaçoes proximas */
+/* Modal estações próximas */
 #nearest-stations-modal {
     position: fixed;
     top: 50%;
@@ -230,8 +177,8 @@ h2 {
     transform: translate(-50%, -50%);
     width: 90%;
     max-width: 800px;
-    background-color: white;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     border-radius: 10px;
     z-index: 10000;
     display: flex;
@@ -243,6 +190,7 @@ h2 {
     width: 95%;
     padding: 20px;
     align-items: center;
+    position: relative;
 }
 
 .modal-content h2 {
@@ -258,19 +206,54 @@ h2 {
     cursor: pointer;
 }
 
+/* Estilização da tabela e seu container */
+.table-container {
+    width: 100%;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
 #nearest-stations-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-#nearest-stations-table th, #nearest-stations-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
+#nearest-stations-table th,
+#nearest-stations-table td {
+    padding: 12px 15px;
     text-align: left;
 }
 
-#nearest-stations-table th {
+#nearest-stations-table thead th {
     background-color: #f2f2f2;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
+#nearest-stations-table tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
 
+#nearest-stations-table tbody tr:nth-child(even) {
+    background-color: #e9e9e9;
+}
+
+#nearest-stations-table tbody tr:hover {
+    background-color: #d1d1d1;
+}
+
+/* Estilização do botão de download */
+#download-selected-stations {
+    padding: 10px 20px;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#download-selected-stations:hover {
+    background-color: #0056b3;
+}

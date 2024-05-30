@@ -53,7 +53,7 @@ browser.find_element(By.XPATH, '//*[@id="root"]/div[2]/div[1]/div[2]/div[4]/inpu
 browser.find_element(By.XPATH, '//*[@id="root"]/div[2]/div[1]/div[2]/div[5]/input').clear()
 browser.find_element(By.XPATH, '//*[@id="root"]/div[2]/div[1]/div[2]/div[5]/input').send_keys(DATA_END)
  
-# #Por fim, clicamos em "gerar tabela"
+# #Por fim, clicamos em "gerar tabela" 
 browser.find_element(By.XPATH,'//*[@id="root"]/div[2]/div[1]/div[2]/button').click()
 
 time.sleep(3)
