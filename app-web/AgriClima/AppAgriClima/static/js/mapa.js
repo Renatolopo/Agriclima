@@ -7,6 +7,11 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 var estacoesData = [];
 var clickMarker; // Variável global para armazenar o marcador de clique
 var markers = []; // Array para armazenar todos os marcadores de estações
+var isUpdatingNearestStations = false;
+var isUpdatingMap = false;
+var isMapMoving = false;
+
+
 
 // Função para adicionar marcadores ao mapa
 function addMarkers(estacoes) {
@@ -57,6 +62,8 @@ function addMarkers(estacoes) {
 
 // Função para carregar marcadores de forma assíncrona
 function loadMarkersAsync() {
+    if (isUpdatingMap) return;
+
     // Faz uma solicitação ao servidor para obter os dados das estações
     fetch('/get_estacoes/')
         .then(response => response.json())
@@ -64,9 +71,26 @@ function loadMarkersAsync() {
         .catch(error => console.error('Erro:', error));
 }
 
+
 // Função para carregar marcadores quando o mapa termina de mover
 function onMapMoveEnd() {
-    loadMarkersAsync();
+    if (isMapMoving) {
+        var lat = parseFloat(document.getElementById('latitude').value);
+        var lng = parseFloat(document.getElementById('longitude').value);
+
+        // Remove marcador anterior, se existir
+        if (clickMarker) {
+            map.removeLayer(clickMarker);
+        }
+
+        // Adiciona novo marcador na posição especificada
+        clickMarker = L.marker([lat, lng]).addTo(map);
+
+        // Atualiza as estações próximas
+        updateNearestStations(lat, lng);
+
+        isMapMoving = false;
+    }
 }
 
 // Adiciona um evento de movimento de mapa para carregar marcadores assincronamente
@@ -91,6 +115,9 @@ function getDistance(lat1, lon1, lat2, lon2) {
 
 // Função para atualizar as cores dos marcadores com base na proximidade ao ponto especificado
 function updateNearestStations(lat, lng) {
+    isUpdatingMap = true;
+    map.off('moveend', onMapMoveEnd);
+
     var nearestStations = estacoesData.map(function(estacao) {
         estacao.distance = getDistance(lat, lng, estacao.latitude, estacao.longitude);
         return estacao;
@@ -109,7 +136,12 @@ function updateNearestStations(lat, lng) {
             marker.setStyle({ fillColor: fillColor });
         }
     });
+
+    map.on('moveend', onMapMoveEnd);
+    isUpdatingMap = false;
 }
+
+
 
 // Adiciona um evento de clique no mapa para preencher latitude e longitude
 map.on('click', function(e) {
@@ -130,6 +162,7 @@ map.on('click', function(e) {
         updateNearestStations(e.latlng.lat, e.latlng.lng);
     }
 });
+
 
 // Função para alternar entre os modos de busca
 function setSearchMode(mode) {
@@ -222,23 +255,18 @@ function onCoordinateChange() {
 
     // Verifica se ambos os campos de latitude e longitude estão preenchidos
     if (!isNaN(lat) && !isNaN(lng)) {
-        // Remove marcador anterior, se existir
-        if (clickMarker) {
-            map.removeLayer(clickMarker);
-        }
-
-        // Adiciona novo marcador na posição especificada
-        clickMarker = L.marker([lat, lng]).addTo(map);
-        map.setView([lat, lng], 13); // Ajusta o zoom e centra o mapa na nova posição
-
-        // Atualiza as estações próximas
-        updateNearestStations(lat, lng);
+        isMapMoving = true;
+        map.setView([lat, lng], 9); // Ajusta o zoom e centra o mapa na nova posição
     }
 }
 
 // Adiciona eventos de mudança nos campos de latitude e longitude
 document.getElementById('latitude').addEventListener('change', onCoordinateChange);
 document.getElementById('longitude').addEventListener('change', onCoordinateChange);
+
+// Adiciona o evento de "moveend" ao mapa
+map.on('moveend', onMapMoveEnd);
+
 
 // Adiciona evento ao botão de buscar para abrir o modal com as estações mais próximas
 document.getElementById('search-button').addEventListener('click', findNearestStations);
