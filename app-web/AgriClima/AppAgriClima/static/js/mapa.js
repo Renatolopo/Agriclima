@@ -6,6 +6,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 var estacoesData = [];
 var clickMarker; // Variável global para armazenar o marcador de clique
+var markers = []; // Array para armazenar todos os marcadores de estações
 
 // Função para adicionar marcadores ao mapa
 function addMarkers(estacoes) {
@@ -19,7 +20,7 @@ function addMarkers(estacoes) {
         var tipoEstacao = estacao.tipoEstacao;
         var fonte = estacao.fonte;
 
-        var fillColor = fonte === 'INMET' ? 'orange' : 'blue';
+        var fillColor = fonte === 'INMET' ? '#FFDB00' : '#0053AB';
 
         // Construir o conteúdo do popup
         var popupContent = `
@@ -34,7 +35,7 @@ function addMarkers(estacoes) {
         var marker = L.circleMarker([latitude, longitude], {
             radius: 5,
             color: 'white',
-            weight: 2,
+            weight: 1,
             fillColor: fillColor,
             fillOpacity: 1
         }).addTo(map).bindPopup(popupContent);
@@ -48,6 +49,9 @@ function addMarkers(estacoes) {
         // Define propriedades personalizadas para acessar dentro do evento de clique
         marker.options.popupContent = nome;
         marker.options.codigo = codigo;
+
+        // Adiciona o marcador ao array de marcadores
+        markers.push(marker);
     });
 }
 
@@ -73,10 +77,44 @@ loadMarkersAsync();
 
 // ===============================================================================
 
+// Função para calcular a distância entre duas coordenadas usando a fórmula de Haversine
+function getDistance(lat1, lon1, lat2, lon2) {
+    var R = 6371; // Raio da Terra em km
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLon = (lon2 - lon1) * Math.PI / 180;
+    var a = 
+        0.5 - Math.cos(dLat)/2 + 
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        (1 - Math.cos(dLon)) / 2;
+    return R * 2 * Math.asin(Math.sqrt(a));
+}
+
+// Função para atualizar as cores dos marcadores com base na proximidade ao ponto especificado
+function updateNearestStations(lat, lng) {
+    var nearestStations = estacoesData.map(function(estacao) {
+        estacao.distance = getDistance(lat, lng, estacao.latitude, estacao.longitude);
+        return estacao;
+    }).sort(function(a, b) {
+        return a.distance - b.distance;
+    }).slice(0, 10); // Seleciona as 10 estações mais próximas
+
+    // Atualiza a cor dos marcadores
+    markers.forEach(function(marker) {
+        var estacao = nearestStations.find(est => est.codigo === marker.options.codigo);
+        if (estacao) {
+            marker.setStyle({ fillColor: '#E53E30' });
+        } else {
+            var estacaoOriginal = estacoesData.find(est => est.codigo === marker.options.codigo);
+            var fillColor = estacaoOriginal.fonte === 'INMET' ? '#FFDB00' : '#0053AB';
+            marker.setStyle({ fillColor: fillColor });
+        }
+    });
+}
+
 // Adiciona um evento de clique no mapa para preencher latitude e longitude
 map.on('click', function(e) {
     if (document.getElementById('mode2-btn').classList.contains('active')) {
-         // Remove marcador anterior, se existir
+        // Remove marcador anterior, se existir
         if (clickMarker) {
             map.removeLayer(clickMarker);
         }
@@ -87,6 +125,9 @@ map.on('click', function(e) {
         // Preenche os campos de latitude e longitude no formulário
         document.getElementById('latitude').value = e.latlng.lat;
         document.getElementById('longitude').value = e.latlng.lng;
+
+        // Atualiza as estações próximas
+        updateNearestStations(e.latlng.lat, e.latlng.lng);
     }
 });
 
@@ -108,24 +149,17 @@ function setSearchMode(mode) {
     }
 }
 
-//        MODAL ESTACOES
-// Função para encontrar as estações mais próximas
+// Função para encontrar as estações mais próximas e exibi-las no modal
 function findNearestStations(event) {
     event.preventDefault();
 
     var lat = parseFloat(document.getElementById('latitude').value);
     var lng = parseFloat(document.getElementById('longitude').value);
 
-    // Calcula a distância entre duas coordenadas usando a fórmula de Haversine
-    function getDistance(lat1, lon1, lat2, lon2) {
-        var R = 6371; // Raio da Terra em km
-        var dLat = (lat2 - lat1) * Math.PI / 180;
-        var dLon = (lon2 - lon1) * Math.PI / 180;
-        var a = 
-            0.5 - Math.cos(dLat)/2 + 
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-            (1 - Math.cos(dLon)) / 2;
-        return R * 2 * Math.asin(Math.sqrt(a));
+    // Verifica se ambos os campos de latitude e longitude estão preenchidos
+    if (isNaN(lat) || isNaN(lng)) {
+        alert('Por favor, preencha as coordenadas de latitude e longitude.');
+        return;
     }
 
     // Adiciona a distância ao objeto de estação
@@ -169,9 +203,42 @@ function findNearestStations(event) {
             checkbox.checked = selectAllCheckbox.checked;
         });
     });
+
+    // Atualiza as estações próximas no mapa
+    updateNearestStations(lat, lng);
 }
 
 // Função para fechar o modal
 function closeModal() {
     document.getElementById('nearest-stations-modal').style.display = 'none';
 }
+
+// ===============================================================================
+
+// Adiciona um evento de mudança nos campos de latitude e longitude
+function onCoordinateChange() {
+    var lat = parseFloat(document.getElementById('latitude').value);
+    var lng = parseFloat(document.getElementById('longitude').value);
+
+    // Verifica se ambos os campos de latitude e longitude estão preenchidos
+    if (!isNaN(lat) && !isNaN(lng)) {
+        // Remove marcador anterior, se existir
+        if (clickMarker) {
+            map.removeLayer(clickMarker);
+        }
+
+        // Adiciona novo marcador na posição especificada
+        clickMarker = L.marker([lat, lng]).addTo(map);
+        map.setView([lat, lng], 13); // Ajusta o zoom e centra o mapa na nova posição
+
+        // Atualiza as estações próximas
+        updateNearestStations(lat, lng);
+    }
+}
+
+// Adiciona eventos de mudança nos campos de latitude e longitude
+document.getElementById('latitude').addEventListener('change', onCoordinateChange);
+document.getElementById('longitude').addEventListener('change', onCoordinateChange);
+
+// Adiciona evento ao botão de buscar para abrir o modal com as estações mais próximas
+document.getElementById('search-button').addEventListener('click', findNearestStations);
