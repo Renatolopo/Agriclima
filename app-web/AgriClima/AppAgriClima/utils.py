@@ -101,6 +101,14 @@ def download_station_data(codigo_estacao, nome_estacao, diretorio_saida, max_ret
 
 
 
+def download_multiple_stations(stations, output_dir):
+    results = []
+    for station in stations:
+        file_path = download_station_data(station['codigo'], station['nome'].replace(" ", "_"), output_dir)
+        results.append(file_path)
+    return results
+
+
 
 def clear_output_directory(directory_path):
     if os.path.exists(directory_path):
