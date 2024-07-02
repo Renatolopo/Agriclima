@@ -5,6 +5,8 @@ from .utils import download_station_data, clear_output_directory
 from django.http import HttpResponse, Http404
 from django.conf import settings
 import os
+from urllib.parse import unquote
+import pandas as pd
 
 # Create your views here.
 def index(request):
@@ -35,7 +37,7 @@ def download_station_data_view(request):
                     return JsonResponse({'success': False, 'error': 'Está estação não contém dados'})
                 else:
                     relative_path = os.path.relpath(file_path, settings.MEDIA_ROOT)
-                    return JsonResponse({'success': True, 'file_path': settings.MEDIA_URL + relative_path, 'file_name': f"{nome_estacao}_{codigo_estacao}_data.csv"})
+                    return JsonResponse({'success': True, 'file_path': settings.MEDIA_URL + relative_path, 'file_name': f"{nome_estacao}_{codigo_estacao}.csv"})
             else:
                 return JsonResponse({'success': False, 'error': 'Failed to download file'})
         else:
@@ -52,28 +54,36 @@ def serve_csv(request, filename):
             response['Content-Disposition'] = f'attachment; filename="{filename}"'
             return response
     else:
-        raise Http404
+        return HttpResponse("Arquivo não encontrado.", status=404)
 
 
 
 
-
-
-
-
-
-# def get_nome_estacao(request):
-#     # Obtém as coordenadas da solicitação
-#     latitude = float(request.GET.get('latitude'))
-#     longitude = float(request.GET.get('longitude'))
+def csv_view(request, file_name, file_path):
+    file_path = unquote(file_path.replace('-', '/'))
     
-#     # Consulta ao banco de dados para encontrar a estação mais próxima das coordenadas clicadas
-#     estacao = Estacao.objects.filter(latitude=latitude, longitude=longitude).first()
+    # Lista todos os arquivos na pasta 'saida'
+    output_dir = os.path.join(settings.MEDIA_ROOT, 'saida')
+    csv_files = [f for f in os.listdir(output_dir) if f.endswith('.csv')]
     
-#     # Verifica se uma estação foi encontrada
-#     if estacao:
-#         # Retorna o nome da estação como resposta JSON
-#         return JsonResponse({'nomeEstacao': estacao.nome})
-#     else:
-#         # Se nenhuma estação for encontrada, retorna uma resposta vazia
-#         return JsonResponse({}, status=404)
+    # Caminho completo do arquivo CSV selecionado
+    full_file_path = os.path.join(settings.MEDIA_ROOT, 'saida', file_name)
+    
+    try:
+        df = pd.read_csv(full_file_path, on_bad_lines='skip',  delimiter=';')
+        table_html = df.to_html(classes='csv-table', index=False)
+    except Exception as e:
+        table_html = f"<p>Erro ao ler o arquivo CSV: {str(e)}</p>"
+    
+    return render(request, 'csv_page.html', {
+        'file_name': file_name,
+        'file_path': file_path,
+        'csv_files': csv_files,
+        'table_html': table_html
+    })
+
+
+
+
+
+

@@ -61,7 +61,7 @@ def download_station_data(codigo_estacao, nome_estacao, diretorio_saida, max_ret
                             if not os.path.exists(diretorio_saida):
                                 os.makedirs(diretorio_saida)
 
-                            output_file_path = os.path.join(diretorio_saida, f"{nome_estacao}_{codigo_estacao}_data.csv")
+                            output_file_path = os.path.join(diretorio_saida, f"{nome_estacao}_{codigo_estacao}.csv")
 
                             with zip_file.open(file_name) as csv_file:
                                 raw_data = csv_file.read()
@@ -113,3 +113,7 @@ def clear_output_directory(directory_path):
                     shutil.rmtree(file_path)
             except Exception as e:
                 print(f'Failed to delete {file_path}. Reason: {e}')
+
+
+
+

@@ -133,7 +133,7 @@
     <!-- Mapa -->
     <script type="text/javascript" src = "{% static 'js/mapa.js' %}" ></script>
 
-    <!-- Script para lidar com o formulário e modal -->
+    <!-- Script para lidar com o formulário 1 e modal -->
     <script>
             document.getElementById('station-form').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -149,29 +149,21 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    document.getElementById('csv-file-path').textContent = data.file_name;
-                    document.getElementById('download-csv-btn').onclick = function() {
-                        window.location.href = data.file_path;
-                    };
-                    document.getElementById('download-csv-btn').style.display = 'inline-block';
-                    document.getElementById('close-modal-btn').style.display = 'none';
-                    document.getElementById('csv-modal').style.display = 'block';
+                    var filePath = data.file_path.replace(/\//g, '-');  // Substitui barras por hífens
+                    var url = '{% url "csv_view" "file_name_placeholder" "file_path_placeholder" %}'
+                                .replace('file_name_placeholder', data.file_name)
+                                .replace('file_path_placeholder', encodeURIComponent(filePath));
+                    window.location.href = url;
                 } else {
-                    document.getElementById('csv-file-path').textContent = data.error;
-                    document.getElementById('download-csv-btn').style.display = 'none';
-                    document.getElementById('close-modal-btn').style.display = 'inline-block';
-                    document.getElementById('csv-modal').style.display = 'block';
+                    alert('Erro: ' + data.error);
                 }
             })
             .catch(error => {
                 alert('Erro: ' + error);
             });
         });
-
-        function closeCsvModal() {
-            document.getElementById('csv-modal').style.display = 'none';
-        }
     </script>
+
 
 
 

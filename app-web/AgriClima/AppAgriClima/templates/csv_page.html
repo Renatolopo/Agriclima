@@ -1,0 +1,120 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriClima - Arquivo CSV</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}">
+    <link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/light/main.css">
+    <style>
+        .container {
+            display: flex;
+            font-family: Arial, sans-serif;
+        }
+        .file-list {
+            width: 25%;
+            padding: 20px;
+            background-color: #f7f7f7;
+            border-right: 1px solid #ddd;
+        }
+        .file-list h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #333;
+        }
+        .file-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .file-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .file-list li a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+        .file-list li button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .file-list li button:hover {
+            background-color: #218838;
+        }
+        .content {
+            width: 75%;
+            padding: 20px;
+        }
+        .csv-table-container {
+            overflow-x: auto;
+        }
+        .csv-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .csv-table th, .csv-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .csv-table th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+        .file-name-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <h1 class="navbar-brand">AgriClima</h1>
+        <ul class="navbar-menu">
+            <li><a href="{% url 'index' %}">Home</a></li>
+            <li><a href="#">Sobre</a></li>
+            <li><a href="#">Documentação</a></li>
+        </ul>
+    </div>
+    
+    <div class="container">
+        <div class="file-list">
+            <h3>Arquivos Disponíveis:</h3>
+            <ul>
+                {% for csv_file in csv_files %}
+                    <li>
+                        <a href="{% url 'csv_view' csv_file csv_file|replace:'/,\\' %}">{{ csv_file }}</a>
+                        <button onclick="window.location.href='{% url 'serve_csv' csv_file %}'">Baixar CSV</button>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="content">
+            <div class="file-name-header">{{ file_name }}</div>
+            <div class="csv-table-container">
+                {{ table_html|safe }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet.js CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    
+    <!-- PapaParse.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    
+</body>
+</html>

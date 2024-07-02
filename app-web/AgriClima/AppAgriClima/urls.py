@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import index, get_estacoes, download_station_data_view, serve_csv
+from .views import index, get_estacoes, download_station_data_view, serve_csv, csv_view
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -8,7 +8,8 @@ urlpatterns = [
     path('', index, name='index'),
     path('get_estacoes/', get_estacoes, name='get_estacoes'),
     path('download/', download_station_data_view, name='download_station_data'),
-     path('data/saida/<str:filename>', serve_csv, name='serve_csv'),
+    path('data/saida/<str:filename>', serve_csv, name='serve_csv'),
+    path('csv/<str:file_name>/<path:file_path>/', csv_view, name='csv_view'),
 ]
 
 
