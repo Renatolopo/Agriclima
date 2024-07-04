@@ -112,10 +112,24 @@
                     </table>
                 </div>
                 <button id="download-selected-stations" onclick="downloadSelectedStations()">Baixar Selecionados</button>
+
+            </div>
+            <!-- Modal Loading -->
+            <div id="loading-modal" style="display: none;">
+               <div class="loading-content">
+                   <div class="loader"></div>
+                   <p>Carregando...</p>
+               </div>
+           </div>
+                
+
             </div>
         </div>
 
-    </div>
+       
+        
+
+
 
 
     
@@ -183,6 +197,9 @@
             alert('Nenhuma estação selecionada.');
             return;
         }
+
+        // Mostrar modal de carregamento
+        document.getElementById('loading-modal').style.display = 'flex';
 
         fetch('{% url "download_multiple_stations_data" %}', {
             method: 'POST',

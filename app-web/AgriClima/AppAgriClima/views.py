@@ -95,7 +95,7 @@ def csv_view(request, file_name, file_path):
         df = pd.read_csv(full_file_path, on_bad_lines='skip',  delimiter=';')
         table_html = df.to_html(classes='csv-table', index=False)
     except Exception as e:
-        table_html = f"<p>Erro ao ler o arquivo CSV: {str(e)}</p>"
+        table_html = f"<p>Não foi encontrado dados dessa estação!</p>"
     
     return render(request, 'csv_page.html', {
         'file_name': file_name,
