@@ -79,17 +79,10 @@
                     <button id="close-modal-btn" onclick="closeCsvModal()">Fechar</button>
                 </div>
             </div>
-           
-
 
         </div>
 
-        
-
-
-
         <!-- Modal para exibir as estações mais próximas -->
-       
         <div id="nearest-stations-modal" style="display: none;">
             <div class="modal-content">
                 <span class="close" onclick="closeModal()">&times;</span>
@@ -112,34 +105,21 @@
                     </table>
                 </div>
                 <button id="download-selected-stations" onclick="downloadSelectedStations()">Baixar Selecionados</button>
-
-            </div>
-            <!-- Modal Loading -->
-            <div id="loading-modal" style="display: none;">
-               <div class="loading-content">
-                   <div class="loader"></div>
-                   <p>Carregando...</p>
-               </div>
-           </div>
-                
-
             </div>
         </div>
 
-       
-        
-
-
-
-
-    
-
-
+        <!-- Modal Loading -->
+        <div id="loading-modal" style="display: none;">
+            <div class="loading-content">
+                <div class="loader"></div>
+                <p>Carregando...</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Leaflet.js CDN -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
     
     <!-- PapaParse.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -149,8 +129,10 @@
 
     <!-- Script para lidar com o formulário 1 e modal -->
     <script>
-            document.getElementById('station-form').addEventListener('submit', function(event) {
+        document.getElementById('station-form').addEventListener('submit', function(event) {
             event.preventDefault();
+
+            document.getElementById('loading-modal').style.display = 'flex';
 
             var formData = new FormData(this);
             fetch('{% url "download_station_data" %}', {
@@ -162,8 +144,10 @@
             })
             .then(response => response.json())
             .then(data => {
+                document.getElementById('loading-modal').style.display = 'none';
+
                 if (data.success) {
-                    var filePath = data.file_path.replace(/\//g, '-');  // Substitui barras por hífens
+                    var filePath = data.file_path.replace(/\//g, '-');
                     var url = '{% url "csv_view" "file_name_placeholder" "file_path_placeholder" %}'
                                 .replace('file_name_placeholder', data.file_name)
                                 .replace('file_path_placeholder', encodeURIComponent(filePath));
@@ -173,66 +157,63 @@
                 }
             })
             .catch(error => {
+                document.getElementById('loading-modal').style.display = 'none';
                 alert('Erro: ' + error);
             });
         });
 
-        // Metodo de busca por coordenadas
         document.getElementById('download-selected-stations').addEventListener('click', function() {
-        var selectedStations = [];
-        var checkboxes = document.querySelectorAll('#nearest-stations-table tbody input[type="checkbox"]:checked');
-        checkboxes.forEach(checkbox => {
-            var row = checkbox.closest('tr');
-            var station = {
-                codigo: row.cells[2].innerText,
-                nome: row.cells[1].innerText,
-                fonte: row.cells[3].innerText,
-                latitude: row.cells[4].innerText,
-                longitude: row.cells[5].innerText
-            };
-            selectedStations.push(station);
-        });
+            var selectedStations = [];
+            var checkboxes = document.querySelectorAll('#nearest-stations-table tbody input[type="checkbox"]:checked');
+            checkboxes.forEach(checkbox => {
+                var row = checkbox.closest('tr');
+                var station = {
+                    codigo: row.cells[2].innerText,
+                    nome: row.cells[1].innerText,
+                    fonte: row.cells[3].innerText,
+                    latitude: row.cells[4].innerText,
+                    longitude: row.cells[5].innerText
+                };
+                selectedStations.push(station);
+            });
 
-        if (selectedStations.length === 0) {
-            alert('Nenhuma estação selecionada.');
-            return;
-        }
-
-        // Mostrar modal de carregamento
-        document.getElementById('loading-modal').style.display = 'flex';
-
-        fetch('{% url "download_multiple_stations_data" %}', {
-            method: 'POST',
-            body: JSON.stringify(selectedStations),
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}',
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                var firstFile = data.results[0];
-                var filePath = firstFile.file_path.replace(/\//g, '-');  // Substitui barras por hífens
-                var fileName = firstFile.file_name;
-
-                var url = '{% url "csv_view" "file_name_placeholder" "file_path_placeholder" %}'
-                            .replace('file_name_placeholder', fileName)
-                            .replace('file_path_placeholder', encodeURIComponent(filePath));
-                window.location.href = url;
-            } else {
-                alert('Erro: ' + data.error);
+            if (selectedStations.length === 0) {
+                alert('Nenhuma estação selecionada.');
+                return;
             }
-        })
-        .catch(error => {
-            alert('Erro: ' + error);
+
+            document.getElementById('loading-modal').style.display = 'flex';
+
+            fetch('{% url "download_multiple_stations_data" %}', {
+                method: 'POST',
+                body: JSON.stringify(selectedStations),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading-modal').style.display = 'none';
+
+                if (data.success) {
+                    var firstFile = data.results[0];
+                    var filePath = firstFile.file_path.replace(/\//g, '-');
+                    var fileName = firstFile.file_name;
+
+                    var url = '{% url "csv_view" "file_name_placeholder" "file_path_placeholder" %}'
+                                .replace('file_name_placeholder', fileName)
+                                .replace('file_path_placeholder', encodeURIComponent(filePath));
+                    window.location.href = url;
+                } else {
+                    alert('Erro: ' + data.error);
+                }
+            })
+            .catch(error => {
+                document.getElementById('loading-modal').style.display = 'none';
+                alert('Erro: ' + error);
+            });
         });
-    });
-
     </script>
-
-
-
-
 </body>
 </html>
