@@ -5,7 +5,8 @@ import os
 import time
 
 def download_station_data(codigo_estacao, diretorio_saida, max_retries=5, backoff_factor=1):
-    url = 'https://www.snirh.gov.br/hidroweb/rest/api/documento/download/files'
+    api_key = '708888966f68dc17d88331a5220992a8'
+    url = f'http://api.scraperapi.com?api_key={api_key}&url=https://www.snirh.gov.br/hidroweb/rest/api/documento/download/files'
     
     cookies = {
         'ASP.NET_SessionId': 'ikp1p3njs324yel24t1hukyc',
