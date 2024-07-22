@@ -49,6 +49,7 @@ function addMarkers(estacoes) {
         marker.on('click', function() {
             document.getElementById('nome-estacao').value = this.options.popupContent;
             document.getElementById('cod-estacao').value = this.options.codigo;
+            document.getElementById('fonte').value = estacao.fonte;
         });
 
         // Define propriedades personalizadas para acessar dentro do evento de clique

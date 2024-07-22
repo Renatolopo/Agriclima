@@ -46,6 +46,13 @@
                                 <label for="cod-estacao">Código da Estação</label>
                                 <input type="text" id="cod-estacao" name="cod-estacao" placeholder="Digite o código da Estação" required>
                             </div>
+
+                            
+                            <label for="fonte">Fonte:</label>
+                            <select id="fonte" name="fonte" required>
+                                <option value="ANA">ANA</option>
+                                <option value="INMET">INMET</option>
+                            </select>
                             <div class="form-group">
                                 <input type="submit" value="Buscar">
                             </div>
@@ -287,7 +294,21 @@
 
                 var startDate = document.getElementById('start-date').value;
                 var endDate = document.getElementById('end-date').value;
-                var selectedStations = JSON.parse(sessionStorage.getItem('selectedStations'));
+                
+                var selectedStations = [];
+                var checkboxes = document.querySelectorAll('#nearest-stations-table tbody input[type="checkbox"]:checked');
+                checkboxes.forEach(checkbox => {
+                    var row = checkbox.closest('tr');
+                    var station = {
+                        codigo: row.cells[2].innerText,
+                        nome: row.cells[1].innerText,
+                        fonte: row.cells[3].innerText,
+                        latitude: row.cells[4].innerText,
+                        longitude: row.cells[5].innerText
+                    };
+                    selectedStations.push(station);
+                });
+
 
                 if (startDate && endDate) {
                     selectedStations.forEach(station => {
@@ -297,6 +318,7 @@
                 }
 
                 document.getElementById('inmet-date-modal').style.display = 'none';
+                console.log(selectedStations)
                 submitSelectedStationsForm(selectedStations);
             });
 

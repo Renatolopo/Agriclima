@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from .models import Estacao
-from .utils import download_station_data, clear_output_directory, download_multiple_stations
+from .utils import download_station_data_general, clear_output_directory, download_multiple_stations
 from django.http import HttpResponse, Http404
 from django.conf import settings
 import os
@@ -11,6 +11,16 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 import io
 import zipfile
+from datetime import datetime
+
+
+def converter_data(data_aaaa_mm_dd):
+    # Converte a string para um objeto datetime
+    data = datetime.strptime(data_aaaa_mm_dd, '%Y-%m-%d')
+    # Converte o objeto datetime para uma string no formato desejado
+    data_formatada = data.strftime('%d/%m/%Y')
+    return data_formatada
+
 
 # Create your views here.
 def index(request):
@@ -29,24 +39,36 @@ def download_station_data_view(request):
     if request.method == 'POST':
         codigo_estacao = request.POST.get('cod-estacao')
         nome_estacao = request.POST.get('nome-estacao').replace(" ", "_")  # Replace spaces with underscores
-        if codigo_estacao and nome_estacao:
+        data_inicio = converter_data(request.POST.get('start-date'))
+        data_fim = converter_data(request.POST.get('end-date'))
+        fonte = request.POST.get('fonte')
+
+        
+        print(f"Received POST request with parameters: codigo_estacao={codigo_estacao}, nome_estacao={nome_estacao}, fonte={fonte}, data_inicio={data_inicio}, data_fim={data_fim}")
+
+        
+        if codigo_estacao and nome_estacao and fonte:
             diretorio_saida = os.path.join(settings.MEDIA_ROOT, 'saida')
             
             # Limpar a pasta de saída antes de baixar o novo arquivo
             clear_output_directory(diretorio_saida)
             
-            file_path = download_station_data(codigo_estacao, nome_estacao, diretorio_saida)
-            if file_path:
-                if "Nenhum arquivo CSV encontrado no ZIP" in file_path or "Cabeçalho 'EstacaoCodigo' não encontrado" in file_path:
-                    return JsonResponse({'success': False, 'error': 'Está estação não contém dados'})
+            try:
+                file_path = download_station_data_general(codigo_estacao, nome_estacao, diretorio_saida, fonte, data_inicio, data_fim)
+                if file_path:
+                    if "Nenhum arquivo CSV encontrado no ZIP" in file_path or "Cabeçalho 'EstacaoCodigo' não encontrado" in file_path:
+                        return JsonResponse({'success': False, 'error': 'Está estação não contém dados'})
+                    else:
+                        relative_path = os.path.relpath(file_path, settings.MEDIA_ROOT)
+                        return JsonResponse({'success': True, 'file_path': settings.MEDIA_URL + relative_path, 'file_name': os.path.basename(file_path)})
                 else:
-                    relative_path = os.path.relpath(file_path, settings.MEDIA_ROOT)
-                    return JsonResponse({'success': True, 'file_path': settings.MEDIA_URL + relative_path, 'file_name': f"{nome_estacao}_{codigo_estacao}.csv"})
-            else:
-                return JsonResponse({'success': False, 'error': 'Failed to download file'})
+                    return JsonResponse({'success': False, 'error': 'Failed to download file'})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
         else:
-            return JsonResponse({'success': False, 'error': 'Invalid station code or name'})
+            return JsonResponse({'success': False, 'error': 'Invalid station code or name or fonte'})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
 
 @csrf_exempt
 def download_multiple_stations_data(request):
@@ -56,16 +78,33 @@ def download_multiple_stations_data(request):
         try:
             # Limpar a pasta de saída antes de baixar o novo arquivo
             clear_output_directory(diretorio_saida)
-            results = download_multiple_stations(stations, diretorio_saida)
+            
+            results = []
+            for station in stations:
+                codigo_estacao = station['codigo']
+                nome_estacao = station['nome'].replace(" ", "_")
+                fonte = station['fonte']
+                data_inicio = None
+                data_fim = None
+                if fonte == 'INMET':
+                    data_inicio = converter_data(station['start-date'])
+                    data_fim = converter_data(station['end-date'])
+                    
+                    
+                print(f"Received POST request with parameters: codigo_estacao={codigo_estacao}, nome_estacao={nome_estacao}, fonte={fonte}, data_inicio={data_inicio}, data_fim={data_fim}")
 
-            # Construa a lista de resultados com nomes e caminhos dos arquivos
-            result_list = [{'file_name': os.path.basename(file_path), 'file_path': settings.MEDIA_URL + os.path.relpath(file_path, settings.MEDIA_ROOT)}
-                           for file_path in results]
 
-            return JsonResponse({'success': True, 'results': result_list})
+                try:
+                    file_path = download_station_data_general(codigo_estacao, nome_estacao, diretorio_saida, fonte, data_inicio, data_fim)
+                    results.append({'file_name': os.path.basename(file_path), 'file_path': settings.MEDIA_URL + os.path.relpath(file_path, settings.MEDIA_ROOT)})
+                except Exception as e:
+                    results.append({'file_name': None, 'file_path': None, 'error': str(e)})
+            
+            return JsonResponse({'success': True, 'results': results})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
 
 
 def serve_csv(request, filename):

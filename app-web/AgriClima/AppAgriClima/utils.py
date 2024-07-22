@@ -8,6 +8,17 @@ from django.conf import settings
 
 import shutil
 
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.alert import Alert
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import UnexpectedAlertPresentException, TimeoutException, NoSuchElementException
+
+
+
 def download_station_data(codigo_estacao, nome_estacao, diretorio_saida, max_retries=5, backoff_factor=1):
     url = 'https://www.snirh.gov.br/hidroweb/rest/api/documento/download/files'
 
@@ -124,4 +135,107 @@ def clear_output_directory(directory_path):
 
 
 
+def download_station_data_inmet(codigo_estacao, nome_estacao, diretorio_saida, data_inicio, data_fim):
+    diretorio_dados = os.path.abspath(diretorio_saida)
+    folder_chrome_driver = '../../drive selenium/chromedriver.exe'
+
+    chrome_options = Options()
+    # chrome_options.add_argument("--headless")  # Modo headless
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--window-size=1920x1080")
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_experimental_option('useAutomationExtension', False)
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+
+    chrome_options.add_experimental_option("prefs", {
+        "download.default_directory": diretorio_dados,
+        "profile.default_content_settings.popups": 0,
+        "download.prompt_for_download": False,
+        "directory_upgrade": True,
+    })
+
+    service = Service(folder_chrome_driver)
+    browser = webdriver.Chrome(service=service, options=chrome_options)
+    browser.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
+        'source': '''
+            Object.defineProperty(navigator, 'webdriver', {
+                get: () => undefined
+            });
+        '''
+    })
+
+    try:
+        browser.get(f'https://tempo.inmet.gov.br/TabelaEstacoes/{codigo_estacao}')
+        time.sleep(3)
+
+        browser.find_element(By.XPATH, '//*[@id="root"]/div[1]/div[1]/i').click()
+        time.sleep(3)
+
+        browser.find_element(By.XPATH, '//button[text()="Automáticas"]').click()
+
+        browser.find_element(By.XPATH, '//*[@id="root"]/div[2]/div[1]/div[2]/div[4]/input').clear()
+        browser.find_element(By.XPATH, '//*[@id="root"]/div[2]/div[1]/div[2]/div[4]/input').send_keys(data_inicio)
+
+        browser.find_element(By.XPATH, '//*[@id="root"]/div[2]/div[1]/div[2]/div[5]/input').clear()
+        browser.find_element(By.XPATH, '//*[@id="root"]/div[2]/div[1]/div[2]/div[5]/input').send_keys(data_fim)
+
+        browser.find_element(By.XPATH, '//*[@id="root"]/div[2]/div[1]/div[2]/button').click()
+
+        try:
+            botao_download = WebDriverWait(browser, 10).until(
+                EC.presence_of_element_located((By.XPATH, '//*[@id="root"]/div[2]/div[2]/div/div/div/span/a'))
+            )
+            file_name = f'{nome_estacao}_{codigo_estacao}.csv'
+            browser.execute_script("arguments[0].setAttribute('download', '{}')".format(file_name), botao_download)
+            botao_download.click()
+            time.sleep(3)  # Tempo para garantir que o download seja concluído
+
+            downloaded_file = os.path.join(diretorio_dados, file_name)
+            if os.path.exists(downloaded_file):
+                print(f"Arquivo CSV salvo em: {downloaded_file}")
+                return downloaded_file
+            else:
+                print("O arquivo CSV não foi encontrado após o download.")
+                return "O arquivo CSV não foi encontrado após o download."
+        except TimeoutException:
+            print("O botão de download não foi encontrado no tempo esperado.")
+            return "O botão de download não foi encontrado no tempo esperado."
+        except UnexpectedAlertPresentException as e:
+            print("Alerta inesperado presente: ", e.alert_text)
+            alert = Alert(browser)
+            alert.accept()
+            time.sleep(3)
+            try:
+                botao_download = WebDriverWait(browser, 10).until(
+                    EC.presence_of_element_located((By.XPATH, '//*[@id="root"]/div[2]/div[2]/div/div/div/span/a'))
+                )
+                browser.execute_script("arguments[0].setAttribute('download', '{}')".format(file_name), botao_download)
+                botao_download.click()
+                time.sleep(3)  # Tempo para garantir que o download seja concluído
+
+                downloaded_file = os.path.join(diretorio_dados, file_name)
+                if os.path.exists(downloaded_file):
+                    print(f"Arquivo CSV salvo em: {downloaded_file}")
+                    return downloaded_file
+                else:
+                    print("O arquivo CSV não foi encontrado após o download.")
+                    return "O arquivo CSV não foi encontrado após o download."
+            except (TimeoutException, NoSuchElementException) as e:
+                print("Erro ao tentar clicar no botão de download novamente: ", e)
+                return "Erro ao tentar clicar no botão de download novamente: " + str(e)
+    finally:
+        time.sleep(3)
+        browser.quit()
+
+
+
+def download_station_data_general(codigo_estacao, nome_estacao, diretorio_saida, fonte, data_inicio=None, data_fim=None):
+    if fonte == 'ANA':
+        return download_station_data(codigo_estacao, nome_estacao, diretorio_saida)
+    elif fonte == 'INMET':
+        return download_station_data_inmet(codigo_estacao, nome_estacao, diretorio_saida, data_inicio, data_fim)
+    else:
+        raise ValueError("Fonte desconhecida")
 
