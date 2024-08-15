@@ -13,7 +13,7 @@ diretorio_dados = "./data/"
 folder_chrome_driver = './drive selenium/chromedriver.exe'
 
 chrome_options = Options()
-# chrome_options.add_argument("--headless")  # Modo headless
+
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
@@ -21,6 +21,7 @@ chrome_options.add_argument("--window-size=1920x1080")
 chrome_options.add_argument("--disable-blink-features=AutomationControlled")
 chrome_options.add_experimental_option('useAutomationExtension', False)
 chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+# chrome_options.add_argument("--headless")  # Adiciona o modo headless
 
 chrome_options.add_experimental_option("prefs", {
     "download.default_directory": os.path.abspath(diretorio_dados),
@@ -29,7 +30,7 @@ chrome_options.add_experimental_option("prefs", {
     "directory_upgrade": True,
 })
 
-VALOR_ESTACAO = 'A539'  
+VALOR_ESTACAO = 'A539'
 DATA_INIT = '22/11/2023'
 DATA_END = '22/01/2024'
 
@@ -43,13 +44,27 @@ browser.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
     '''
 })
 
+def handle_alert():
+    try:
+        alert = Alert(browser)
+        alert.accept()
+        return True
+    except:
+        return False
+
 def carregar_tabela():
     try:
         browser.get(f'https://tempo.inmet.gov.br/TabelaEstacoes/{VALOR_ESTACAO}')
         time.sleep(3)
 
+        while handle_alert():
+            time.sleep(1)
+
         browser.find_element(By.XPATH, '//*[@id="root"]/div[1]/div[1]/i').click()
         time.sleep(3)
+
+        while handle_alert():
+            time.sleep(1)
 
         browser.find_element(By.XPATH, '//button[text()="Automáticas"]').click()
 
@@ -71,8 +86,7 @@ def carregar_tabela():
             print("O botão de download não foi encontrado no tempo esperado.")
         except UnexpectedAlertPresentException as e:
             print("Alerta inesperado presente: ", e.alert_text)
-            alert = Alert(browser)
-            alert.accept()
+            handle_alert()
             time.sleep(3)
             try:
                 botao_download = WebDriverWait(browser, 10).until(

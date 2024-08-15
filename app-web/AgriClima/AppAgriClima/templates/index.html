@@ -194,30 +194,43 @@
             }
 
             fetch('{% url "download_station_data" %}', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('loading-modal').style.display = 'none';
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('loading-modal').style.display = 'none';
 
-                if (data.success) {
+            if (data.success) {
+                if (data.file_path && data.file_name) {
                     var filePath = data.file_path.replace(/\//g, '-');
                     var url = '{% url "csv_view" "file_name_placeholder" "file_path_placeholder" %}'
                                 .replace('file_name_placeholder', data.file_name)
                                 .replace('file_path_placeholder', encodeURIComponent(filePath));
                     window.location.href = url;
                 } else {
-                    alert('Erro: ' + data.error);
+                    console.warn('Caminho ou nome do arquivo não encontrado na resposta.');
                 }
-            })
-            .catch(error => {
-                document.getElementById('loading-modal').style.display = 'none';
-                alert('Erro: ' + error);
-            });
+            } else {
+                alert('Erro: ' + data.error);
+            }
+        })
+        .catch(error => {
+            document.getElementById('loading-modal').style.display = 'none';
+            if (!error.message.includes("Cannot read properties of undefined (reading 'file_path')")) {
+                alert('Erro: ' + error.message);
+            } else {
+                console.warn('Erro: ' + error.message);
+            }
+        });
         }
 
         function closeInmetDateModal() {

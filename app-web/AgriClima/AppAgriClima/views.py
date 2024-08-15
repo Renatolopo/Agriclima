@@ -39,14 +39,16 @@ def download_station_data_view(request):
     if request.method == 'POST':
         codigo_estacao = request.POST.get('cod-estacao')
         nome_estacao = request.POST.get('nome-estacao').replace(" ", "_")  # Replace spaces with underscores
-        data_inicio = converter_data(request.POST.get('start-date'))
-        data_fim = converter_data(request.POST.get('end-date'))
         fonte = request.POST.get('fonte')
+        if fonte == 'INMET':
+            data_inicio = converter_data(request.POST.get('start-date'))
+            data_fim = converter_data(request.POST.get('end-date'))
+        else:
+            data_inicio = None
+            data_fim = None
 
-        
         print(f"Received POST request with parameters: codigo_estacao={codigo_estacao}, nome_estacao={nome_estacao}, fonte={fonte}, data_inicio={data_inicio}, data_fim={data_fim}")
 
-        
         if codigo_estacao and nome_estacao and fonte:
             diretorio_saida = os.path.join(settings.MEDIA_ROOT, 'saida')
             
@@ -55,9 +57,10 @@ def download_station_data_view(request):
             
             try:
                 file_path = download_station_data_general(codigo_estacao, nome_estacao, diretorio_saida, fonte, data_inicio, data_fim)
+                print(f'File path: {file_path}')
                 if file_path:
                     if "Nenhum arquivo CSV encontrado no ZIP" in file_path or "Cabeçalho 'EstacaoCodigo' não encontrado" in file_path:
-                        return JsonResponse({'success': False, 'error': 'Está estação não contém dados'})
+                        return JsonResponse({'success': False, 'error': 'Esta estação não contém dados'})
                     else:
                         relative_path = os.path.relpath(file_path, settings.MEDIA_ROOT)
                         return JsonResponse({'success': True, 'file_path': settings.MEDIA_URL + relative_path, 'file_name': os.path.basename(file_path)})

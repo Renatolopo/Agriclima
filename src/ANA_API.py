@@ -5,29 +5,12 @@ import os
 import time
 
 def download_station_data(codigo_estacao, diretorio_saida, max_retries=5, backoff_factor=1):
-    api_key = '708888966f68dc17d88331a5220992a8'
-    url = f'http://api.scraperapi.com?api_key={api_key}&url=https://www.snirh.gov.br/hidroweb/rest/api/documento/download/files'
+    url = 'https://www.snirh.gov.br/hidroweb/rest/api/documento/download/files'
     
-    cookies = {
-        'ASP.NET_SessionId': 'ikp1p3njs324yel24t1hukyc',
-        '27628ed70890f724c98c0800461fb776': 'bc84d6fd8f8fe62e432a5ea4812337b9',
-        'c82026e9a6b8da54e034dc38d01ba2a4': 'c792c4a30833ad8853eda3b70e64e606',
-    }
-
     headers = {
-        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-        'accept-language': 'pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7',
-        'priority': 'u=0, i',
-        'referer': 'https://www.snirh.gov.br/hidroweb/serieshistoricas',
-        'sec-ch-ua': '"Google Chrome";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'document',
-        'sec-fetch-mode': 'navigate',
-        'sec-fetch-site': 'same-origin',
-        'sec-fetch-user': '?1',
-        'upgrade-insecure-requests': '1',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+        'Authorization': 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJleHAiOjE3MjM1OTQ1NTYsImlhdCI6MTcyMzU5Mzk1Nn0.VJOXh_wMntF-6ginOXG7XZni53PcD9if_VJHW06n3Lbd1-iaCtwt2X4zAw6TCJvSJXDqfro_eyOtVv51DIelKQ',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
     }
 
     params = {
@@ -38,7 +21,11 @@ def download_station_data(codigo_estacao, diretorio_saida, max_retries=5, backof
 
     for attempt in range(max_retries):
         try:
-            response = requests.get(url, params=params, cookies=cookies, headers=headers, timeout=10)
+            response = requests.get(url, params=params, headers=headers, timeout=10)
+            print(f"Request URL: {response.url}")
+            print(f"Request Headers: {response.request.headers}")
+            print(f"Response Status Code: {response.status_code}")
+            print(f"Response Text: {response.text}")
             
             if response.status_code == 200:
                 content_type = response.headers.get('Content-Type')
@@ -89,7 +76,6 @@ def download_station_data(codigo_estacao, diretorio_saida, max_retries=5, backof
         except requests.exceptions.RequestException as e:
             print(f"Erro na tentativa {attempt + 1}: {e}")
         
-        # Calcular o tempo de espera exponencial
         sleep_time = backoff_factor * (2 ** attempt)
         print(f"Aguardando {sleep_time} segundos antes da próxima tentativa...")
         time.sleep(sleep_time)
@@ -97,8 +83,7 @@ def download_station_data(codigo_estacao, diretorio_saida, max_retries=5, backof
     raise Exception(f"Falha ao baixar arquivo após {max_retries} tentativas.")
 
 # Exemplo de uso
-codigo_estacao = '1443009'  # Substitua pelo código da estação desejada
-diretorio_saida = "./data/saida/"  # Diretório de saída
+codigo_estacao = '1444011'
+diretorio_saida = "./data/saida/"
 output_file_path = download_station_data(codigo_estacao, diretorio_saida)
 print(output_file_path)
- 

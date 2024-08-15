@@ -1,49 +1,82 @@
-import requests
-from bs4 import BeautifulSoup
+import os
+import time
+from playwright.sync_api import sync_playwright
 
-# URL para a qual vamos fazer a requisição
-url = "https://apitempo.inmet.gov.br/estacao/front/"
+diretorio_dados = "./data/"
 
-# Dados do payload
-payload = {
-    'data_inicio': "2024-05-22",
-    'data_fim': "2024-06-05",
-    'estacao': "A526",
-    'seed': "6OsXwKYF9YHarijHswS0ACY54NiK4babXLRgpx6rSP1Hj3ygcc&eUZUMGc1RlpRNUlhRm5VQTZ3UDNTSEVDbmRjV2U0Y3RZWkRhQ3k1bGsyUVpoVk1aNlgNk9zWHdLWUY5WUhhcmlqSHN3UzBBQ1k1NE5pSzRiYWJYTFJncHg2clNQMUhqM3lnY2M=",
-    'gcap': "03AFcWeA72Yx2x7x4Rw-zNR9_yzQj0aHYDK4CNm9dJ5A_rXyMKv2cVpbgSJLwOU4JTMvezUMqlld1hrP7ehJ_xmER8arQ80fD5O43lXI0hILNuA8Dh4fV9REpkI3CEQT91qqvXqI-e57lWKjAmYSfb7hkCp1I7uOdL3CGTAQq8nzLa0tn2kw0xTD-Vov1cLbp9OWJ0w63tN59QJ67oYyqK_slyHs9B1vmJJpB_TCEJmCHdNVI_SREly_OlxpNOV00bUAaBEx9f5ftqThCsOBVRd1745tAfe2u3raS5pND7vqLysjDPNpCOqFbX-ey7OrFA6SZWAxnMeVw8m1vFe3UtroWjtvjDOn_VML6r2uXNRD_kwchZJSt8UQh2tNfizY3p3AY63T8wt7DrAlX6CO5VedAa5tIIGxQXFNoGQrhAztVJ4AyBKz6f2vKzcQQIfyioliNhVHSwEuyssQlrHSH4FMsaqPgDt-wjdLvh-L0JQ5fQ-34AFZ-1CF0wmfmk1yi1c6cxU81ONnKrw9uyB-v7uBIjY6CIbf8U6cQYIW8S05SOpOTPCDpkxgGe1DUBseu7RemLTT6Ci967VHdf_assxJkcPF07H5uxG38bHmV8eC9tTjRxTHadOSiGhcsCBzBW2b4pKNmVpa35IQIK95j3xYoGJxPGpjHy84bztKbQwm84tRWOO1VIwbr50OOwHyPvhIHEUuyhWihL"
-}
+VALOR_ESTACAO = 'A539'
+DATA_INIT = '2023-11-21'
+DATA_END = '2024-01-21'
 
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-    'Referer': 'https://tempo.inmet.gov.br/',
-    'Content-Type': 'application/json',
-    'Origin': 'https://tempo.inmet.gov.br',
-    'Accept': 'application/json, text/plain, */*',
-    'Accept-Encoding': 'gzip, deflate, br, zstd',
-    'Accept-Language': 'pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7',
-    'Connection': 'keep-alive',
-    'Sec-Ch-Ua': '"Google Chrome";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
-    'Sec-Ch-Ua-Mobile': '?0',
-    'Sec-Ch-Ua-Platform': '"Windows"',
-    'Sec-Fetch-Dest': 'empty',
-    'Sec-Fetch-Mode': 'cors',
-    'Sec-Fetch-Site': 'same-site'
-}
+def handle_alert(page):
+    try:
+        page.on("dialog", lambda dialog: dialog.accept())
+        return True
+    except:
+        return False
 
-# Fazendo a requisição POST
-response = requests.post(url, data=payload,  headers=headers)
+def carregar_tabela():
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True, args=[
+            '--start-maximized',
+            '--disable-blink-features=AutomationControlled',
+            '--disable-web-security',
+            '--disable-features=IsolateOrigins,site-per-process'
+        ])  # Modo headless ativado com tela maximizada
+        
+        context = browser.new_context(
+            viewport={"width": 1920, "height": 1080},
+            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36'
+        )  # Definindo a resolução da tela e User-Agent
+        
+        page = context.new_page()
 
-# Verificando se a requisição foi bem sucedida
-if response.status_code == 200:
-    soup = BeautifulSoup(response.content, 'html.parser')
+        # Modificações do navegador para esconder que está em modo headless
+        page.add_init_script('''() => {
+            Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+            Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
+            Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+        }''')
 
-    print(soup)
+        page.goto(f'https://tempo.inmet.gov.br/TabelaEstacoes/{VALOR_ESTACAO}')
+        time.sleep(3)  # Aumentando o tempo de espera para garantir que a página carregue completamente
 
-    # tabelas = soup.find_all('table')
-    # for tabela in tabelas:
-    #     print(tabela.prettify())
+        
 
-else:
-    print(f"Falha na requisição: {response.status_code}")
-    print(response.text) 
- 
+        page.locator('//*[@id="root"]/div[1]/div[1]/i').click()
+        time.sleep(3)
+
+        # Adicionando verificação de visibilidade
+        automatics_button = page.locator('//button[text()="Automáticas"]')
+        automatics_button.wait_for(state="visible", timeout=60000)
+        automatics_button.click()
+
+       
+
+        page.locator('//*[@id="root"]/div[2]/div[1]/div[2]/div[4]/input').fill(DATA_INIT)
+        page.locator('//*[@id="root"]/div[2]/div[1]/div[2]/div[5]/input').fill(DATA_END)
+        page.locator('//*[@id="root"]/div[2]/div[1]/div[2]/button').click()
+
+        
+
+        try:
+            botao_download = page.wait_for_selector('//*[@id="root"]/div[2]/div[2]/div/div/div/span/a', timeout=30000)
+
+            # Listener para o evento de download
+            with page.expect_download() as download_info:
+                page.evaluate('button => button.setAttribute("download", "base_' + VALOR_ESTACAO + '_' + DATA_INIT + '_' + DATA_END + '")', botao_download)
+                botao_download.click()
+            
+            download = download_info.value
+            download_path = os.path.join(diretorio_dados, download.suggested_filename)
+            download.save_as(download_path)
+            print(f"Arquivo baixado em: {download_path}")
+        except Exception as e:
+            
+            print("O botão de download não foi encontrado no tempo esperado ou houve um erro: ", e)
+
+        time.sleep(3)
+        browser.close()
+
+if __name__ == "__main__":
+    carregar_tabela()
