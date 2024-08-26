@@ -169,17 +169,17 @@ def download_station_data_inmet(codigo_estacao, nome_estacao, diretorio_saida, d
 
 
         page.goto(f'https://tempo.inmet.gov.br/TabelaEstacoes/{codigo_estacao}')
-        time.sleep(3)  # Aumentando o tempo de espera para garantir que a página carregue completamente
+        # time.sleep(3)  # Aumentando o tempo de espera para garantir que a página carregue completamente
 
         page.locator('//*[@id="root"]/div[1]/div[1]/i').click()
-        time.sleep(3)
+        # time.sleep(3)
 
         # Adicionando verificação de visibilidade
         automatics_button = page.locator('//button[text()="Automáticas"]')
         automatics_button.wait_for(state="visible", timeout=60000)
         automatics_button.click()
 
-        time.sleep(2)
+        # time.sleep(2)
         print(page.locator('//*[@id="root"]/div[2]/div[1]/div[2]/div[4]/input'))
 
         page.locator('//*[@id="root"]/div[2]/div[1]/div[2]/div[4]/input').fill(data_inicio)
@@ -203,7 +203,7 @@ def download_station_data_inmet(codigo_estacao, nome_estacao, diretorio_saida, d
             print("O botão de download não foi encontrado no tempo esperado ou houve um erro: ", e)
             return "O botão de download não foi encontrado no tempo esperado ou houve um erro: " + str(e)
         finally:
-            time.sleep(3)
+            # time.sleep(3)
             browser.close()
 
 

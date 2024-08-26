@@ -220,13 +220,13 @@
                     console.warn('Caminho ou nome do arquivo não encontrado na resposta.');
                 }
             } else {
-                alert('Erro: ' + data.error);
+                // alert('Erro: ' + data.error);
             }
         })
         .catch(error => {
             document.getElementById('loading-modal').style.display = 'none';
             if (!error.message.includes("Cannot read properties of undefined (reading 'file_path')")) {
-                alert('Erro: ' + error.message);
+                // alert('Erro: ' + error.message);
             } else {
                 console.warn('Erro: ' + error.message);
             }
@@ -293,12 +293,13 @@
                                     .replace('file_path_placeholder', encodeURIComponent(filePath));
                         window.location.href = url;
                     } else {
-                        alert('Erro: ' + data.error);
+                        // alert('Erro: ' + data.error);
                     }
                 })
                 .catch(error => {
-                    document.getElementById('loading-modal').style.display = 'none';
-                    alert('Erro: ' + error);
+                    document.getElementById('loading-modal').style.display = 'flex';
+                    // alert('Erro: ' + error);
+                    
                 });
             }
 
