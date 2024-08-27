@@ -3,12 +3,13 @@ import zipfile
 import io
 import os
 import time
-
 def download_station_data(codigo_estacao, diretorio_saida, max_retries=5, backoff_factor=1):
     url = 'https://www.snirh.gov.br/hidroweb/rest/api/documento/download/files'
     
+    token = 'eyJhbGciOiJIUzUxMiJ9.eyJleHAiOjE3MjQxNzQyNjUsImlhdCI6MTcyNDE3MzY2NX0.3w5QBAoZqSn8PSNrdlqDq8Pd_ML7D9Blm1cuyp3oLH9cKc9GgpZRsatq1RMS2M7CNObK-BSWuIKWC3U19PTn7Q'
+    
     headers = {
-        'Authorization': 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJleHAiOjE3MjM1OTQ1NTYsImlhdCI6MTcyMzU5Mzk1Nn0.VJOXh_wMntF-6ginOXG7XZni53PcD9if_VJHW06n3Lbd1-iaCtwt2X4zAw6TCJvSJXDqfro_eyOtVv51DIelKQ',
+        'Authorization': f'Bearer {token}',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
     }
@@ -72,6 +73,8 @@ def download_station_data(codigo_estacao, diretorio_saida, max_retries=5, backof
                     return "O arquivo baixado não é um arquivo ZIP válido."
             else:
                 print(f"Falha ao baixar arquivo. Status code: {response.status_code}")
+                if response.status_code == 401:
+                    return "Token de autenticação inválido ou expirado."
                 
         except requests.exceptions.RequestException as e:
             print(f"Erro na tentativa {attempt + 1}: {e}")
