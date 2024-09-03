@@ -1,1 +1,0 @@
-web: gunicorn AgriClima.wsgi:application
