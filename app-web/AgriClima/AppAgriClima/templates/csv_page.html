@@ -76,6 +76,33 @@
             font-weight: bold;
             margin-bottom: 10px;
         }
+        .summary-box {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .summary-item {
+            font-size: 16px;
+        }
+        .container {
+            display: flex;
+            font-family: Arial, sans-serif;
+        }
+        .content {
+            width: 75%;
+            padding: 20px;
+        }
+        .csv-table-container {
+            overflow-x: auto;
+        }
+        .csv-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -102,10 +129,34 @@
             </ul>
         </div>
         <div class="content">
+            <h1>Resumo dos dados</h1>
             <div class="file-name-header">{{ file_name }}</div>
+
+            <!-- Resumo sobre o arquivo -->
+            <div class="summary-box">
+                <div class="summary-item">
+                    <strong>Quantidade de registros:</strong> {{ quantidade_registros }}
+                </div>
+                <div class="summary-item">
+                    <strong>Dados faltantes (meses):</strong> {{ dados_faltantes }}
+                </div>
+                <div class="summary-item">
+                    <strong>Data do Último registro: </strong> {{ data_ultimo_registro }}
+                </div>
+            </div>
+
+            <div class="container">
+                <div class="content">
+                    <h2>Gráfico de Chuva</h2>
+                    <canvas id="rainChart"></canvas> <!-- Canvas para o gráfico -->
+        
+                </div>
+            </div>
             <div class="csv-table-container">
                 {{ table_html|safe }}
             </div>
+
+            
         </div>
     </div>
 
@@ -115,10 +166,47 @@
     
     <!-- PapaParse.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Esconder o modal de carregamento
             document.getElementById('loading-modal').style.display = 'none';
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('rainChart').getContext('2d');
+            const rainChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: {{ chart_labels|safe }},  // Labels do gráfico (datas)
+                    datasets: [{
+                        label: 'Chuva (mm)',
+                        data: {{ chart_data|safe }},  // Dados de chuva
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: '{{ chart_type|title }}'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Chuva (mm)'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
         });
     </script>
     

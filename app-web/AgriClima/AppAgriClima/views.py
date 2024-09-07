@@ -122,7 +122,6 @@ def serve_csv(request, filename):
 
 
 
-
 def csv_view(request, file_name, file_path):
     file_path = unquote(file_path.replace('-', '/'))
     
@@ -134,17 +133,80 @@ def csv_view(request, file_name, file_path):
     full_file_path = os.path.join(output_dir, file_name)
     
     try:
-        df = pd.read_csv(full_file_path, on_bad_lines='skip',  delimiter=';')
+        # Carregar o CSV como DataFrame
+        df = pd.read_csv(full_file_path, on_bad_lines='skip', delimiter=';')
+        df = df.sort_values(by='Data')
         table_html = df.to_html(classes='csv-table', index=False)
+
+        # Quantidade de registros (linhas válidas no DataFrame)
+        quantidade_registros = df.shape[0]
+
+        # Verifica o tipo de arquivo (ANA ou INMET)
+        if 'Chuva01' in df.columns:  # Arquivo do ANA
+            # Convertendo colunas de chuva para numérico (ignorar erros e tratar como NaN)
+            chuva_columns = df.filter(like='Chuva').columns
+            df[chuva_columns] = df[chuva_columns].apply(pd.to_numeric, errors='coerce')
+
+            # Processar dados mensais de chuva somando as colunas de chuva
+            df['TotalMensal'] = df[chuva_columns].sum(axis=1, skipna=True)
+            df['Data'] = pd.to_datetime(df['Data'], errors='coerce')
+            df = df.dropna(subset=['Data'])  # Remove linhas sem datas válidas
+            chart_labels = df['Data'].dt.strftime('%m/%Y').tolist()
+            chart_data = df['TotalMensal'].tolist()
+            chart_type = 'mensal'
+        
+        elif 'Chuva (mm)' in df.columns:  # Arquivo do INMET
+            # Processar dados diários de chuva
+            df['Data'] = pd.to_datetime(df['Data'], errors='coerce')
+            df = df.dropna(subset=['Data'])  # Remove linhas sem datas válidas
+            chart_labels = df['Data'].dt.strftime('%d/%m/%Y').tolist()
+            df['Chuva (mm)'] = pd.to_numeric(df['Chuva (mm)'], errors='coerce')  # Converte a coluna de chuva para numérico
+            chart_data = df['Chuva (mm)'].tolist()
+            chart_type = 'diario'
+        
+        else:
+            chart_labels = []
+            chart_data = []
+            chart_type = 'desconhecido'
+        
+        # Calcular a data do último registro e formatar como dd/mm/yyyy
+        data_ultimo_registro = df['Data'].max().strftime('%d/%m/%Y') if not df['Data'].empty else None
+
+        # Calcular dados faltantes (meses)
+        if chart_type == 'mensal':
+            # Agrupar por mês e contar quantos meses estão faltando
+            df['MesAno'] = df['Data'].dt.to_period('M')  # Extraí o mês/ano
+            meses_disponiveis = df['MesAno'].nunique()  # Número de meses únicos
+            data_min = df['Data'].min()
+            data_max = df['Data'].max()
+            meses_no_intervalo = pd.date_range(start=data_min, end=data_max, freq='M').nunique()
+            dados_faltantes = meses_no_intervalo - meses_disponiveis
+        else:
+            dados_faltantes = 0
+
     except Exception as e:
+        print(e)
         table_html = f"<p>Não foi encontrado dados dessa estação!</p>"
-    
+        chart_labels = []
+        chart_data = []
+        chart_type = 'erro'
+        quantidade_registros = 0
+        dados_faltantes = 0
+        data_ultimo_registro = None
+
     return render(request, 'csv_page.html', {
         'file_name': file_name,
         'file_path': file_path,
         'csv_files': csv_files,
-        'table_html': table_html
+        'table_html': table_html,
+        'chart_labels': chart_labels,  # Labels do gráfico
+        'chart_data': chart_data,  # Dados do gráfico
+        'chart_type': chart_type,  # Tipo de gráfico (mensal ou diário)
+        'quantidade_registros': quantidade_registros,  # Quantidade de registros
+        'dados_faltantes': dados_faltantes,  # Meses faltantes
+        'data_ultimo_registro': data_ultimo_registro  # Data do último registro formatada
     })
+
 
 
 
