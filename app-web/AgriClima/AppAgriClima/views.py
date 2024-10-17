@@ -135,7 +135,8 @@ def csv_view(request, file_name, file_path):
     try:
         # Carregar o CSV como DataFrame
         df = pd.read_csv(full_file_path, on_bad_lines='skip', delimiter=';')
-        df = df.sort_values(by='Data')
+        df = df.sort_values(by='Data')  # Já está ordenado pela Data
+        print(df.head()) 
         table_html = df.to_html(classes='csv-table', index=False)
 
         # Quantidade de registros (linhas válidas no DataFrame)
@@ -151,18 +152,34 @@ def csv_view(request, file_name, file_path):
             df['TotalMensal'] = df[chuva_columns].sum(axis=1, skipna=True)
             df['Data'] = pd.to_datetime(df['Data'], errors='coerce')
             df = df.dropna(subset=['Data'])  # Remove linhas sem datas válidas
-            chart_labels = df['Data'].dt.strftime('%m/%Y').tolist()
+            df = df.sort_values(by='Data')  # Garantir que está ordenado pela data
+            chart_labels = df['Data'].dt.strftime('%d/%Y').tolist()
             chart_data = df['TotalMensal'].tolist()
             chart_type = 'mensal'
         
         elif 'Chuva (mm)' in df.columns:  # Arquivo do INMET
-            # Processar dados diários de chuva
+            # Converter a coluna 'Data' para datetime, detectando o formato automaticamente
             df['Data'] = pd.to_datetime(df['Data'], errors='coerce')
             df = df.dropna(subset=['Data'])  # Remove linhas sem datas válidas
-            chart_labels = df['Data'].dt.strftime('%d/%m/%Y').tolist()
-            df['Chuva (mm)'] = pd.to_numeric(df['Chuva (mm)'], errors='coerce')  # Converte a coluna de chuva para numérico
-            chart_data = df['Chuva (mm)'].tolist()
+
+            # Converter coluna 'Chuva (mm)' para numérico e substituir NaNs por 0
+            df['Chuva (mm)'] = pd.to_numeric(df['Chuva (mm)'], errors='coerce').fillna(0)
+
+            # Verificar se o DataFrame está vazio ou se há dados válidos
+            if df.empty:
+                chart_labels = []
+                chart_data = []
+                print("Não há dados suficientes para exibir o gráfico.")
+            else:
+                # Formatar as labels como mês/ano
+                chart_labels = df['Data'].dt.strftime('%Y-%m-%d').tolist()
+                chart_data = df['Chuva (mm)'].tolist()
+
             chart_type = 'diario'
+
+            # Print para verificar os dados
+            print(f"chart_labels: {chart_labels}")
+            # print(f"chart_data: {chart_data}")
         
         else:
             chart_labels = []
@@ -194,6 +211,10 @@ def csv_view(request, file_name, file_path):
         dados_faltantes = 0
         data_ultimo_registro = None
 
+
+
+
+
     return render(request, 'csv_page.html', {
         'file_name': file_name,
         'file_path': file_path,
@@ -206,7 +227,6 @@ def csv_view(request, file_name, file_path):
         'dados_faltantes': dados_faltantes,  # Meses faltantes
         'data_ultimo_registro': data_ultimo_registro  # Data do último registro formatada
     })
-
 
 
 

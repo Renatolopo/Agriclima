@@ -431,6 +431,34 @@
 
             endDateInput.max = maxEndDate.toISOString().split('T')[0];
         });
+
+        document.addEventListener('DOMContentLoaded', function() {
+        var startDateInput = document.getElementById('start-date');
+        var endDateInput = document.getElementById('end-date');
+        
+        // Obter a data de hoje
+        var today = new Date();
+        
+        // Definir a data final como hoje
+        var endDate = today.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        endDateInput.value = endDate;
+        
+        // Calcular a data de início como seis meses antes de hoje
+        var startDate = new Date();
+        startDate.setMonth(today.getMonth() - 6);
+        
+        // Ajuste o dia se a data inicial cair no último dia do mês
+        if (today.getDate() < startDate.getDate()) {
+            startDate.setDate(0); // Último dia do mês anterior
+        }
+
+        var formattedStartDate = startDate.toISOString().split('T')[0];
+        startDateInput.value = formattedStartDate;
+        
+        // Definir a data mínima e máxima para o input de data final
+        endDateInput.min = formattedStartDate;
+        endDateInput.max = endDate;
+    });
     </script>
  
 </body>

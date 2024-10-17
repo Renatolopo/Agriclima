@@ -103,6 +103,18 @@
             border-collapse: collapse;
             margin-top: 20px;
         }
+        .chart-container {
+            width: 100%;
+            max-width: 1000px; /* Largura máxima para o container do gráfico */
+            overflow-x: auto; /* Ativa a barra de rolagem horizontal */
+            white-space: nowrap; /* Impede quebra de linha no gráfico */
+        }
+
+        canvas {
+            min-width: 800px; /* Largura mínima para o gráfico */
+            width: 1500px; /* Defina uma largura maior para exibir mais datas */
+            height: 400px; /* Altura fixa para o gráfico */
+        }
     </style>
 </head>
 <body>
@@ -148,8 +160,9 @@
             <div class="container">
                 <div class="content">
                     <h2>Gráfico de Chuva</h2>
-                    <canvas id="rainChart"></canvas> <!-- Canvas para o gráfico -->
-        
+                    <div class="chart-container">
+                        <canvas id="rainChart"></canvas> <!-- Canvas para o gráfico -->
+                    </div>
                 </div>
             </div>
             <div class="csv-table-container">
@@ -169,45 +182,45 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Esconder o modal de carregamento
-            document.getElementById('loading-modal').style.display = 'none';
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const ctx = document.getElementById('rainChart').getContext('2d');
-            const rainChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: {{ chart_labels|safe }},  // Labels do gráfico (datas)
-                    datasets: [{
-                        label: 'Chuva (mm)',
-                        data: {{ chart_data|safe }},  // Dados de chuva
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        fill: true,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: {
+    const ctx = document.getElementById('rainChart').getContext('2d');
+
+    const rainChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},  // Labels formatadas como 'YYYY-MM-DD'
+            datasets: [{
+                label: 'Chuva (mm)',
+                data: {{ chart_data|safe }},
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
                             title: {
                                 display: true,
                                 text: '{{ chart_type|title }}'
                             }
                         },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Chuva (mm)'
-                            },
-                            beginAtZero: true
-                        }
-                    }
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Chuva (mm)'
+                    },
+                    beginAtZero: true
                 }
-            });
-        });
+            }
+        }
+    });
+});
+
+
+
+
     </script>
     
 </body>
