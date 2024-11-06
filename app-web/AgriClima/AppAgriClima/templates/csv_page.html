@@ -103,17 +103,34 @@
             border-collapse: collapse;
             margin-top: 20px;
         }
-        .chart-container {
+        .chart-container-chuva {
             width: 100%;
-            max-width: 1000px; /* Largura máxima para o container do gráfico */
-            overflow-x: auto; /* Ativa a barra de rolagem horizontal */
-            white-space: nowrap; /* Impede quebra de linha no gráfico */
+            max-width: 1000px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .chart-container-chuva canvas {
+            min-width: 800px;
+            width: 1500px;
+            height: 400px;
+        }
+
+        /* Novo estilo para os gráficos de registros e dados faltantes */
+        .chart-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            max-width: 600px; /* Limita a largura total do container */
+        }
+
+        .chart-box {
+            width: 45%; /* Cada gráfico ocupa 45% da largura */
         }
 
         canvas {
-            min-width: 800px; /* Largura mínima para o gráfico */
-            width: 1500px; /* Defina uma largura maior para exibir mais datas */
-            height: 400px; /* Altura fixa para o gráfico */
+            width: 100%;  /* Ocupa toda a largura da caixa */
+            height: 200px; /* Reduz a altura dos gráficos */
         }
     </style>
 </head>
@@ -140,6 +157,7 @@
                 {% endfor %}
             </ul>
         </div>
+    
         <div class="content">
             <h1>Resumo dos dados</h1>
             <div class="file-name-header">{{ file_name }}</div>
@@ -156,11 +174,13 @@
                     <strong>Data do Último registro: </strong> {{ data_ultimo_registro }}
                 </div>
             </div>
+            
 
+            <!-- Grafico de chuva -->
             <div class="container">
                 <div class="content">
                     <h2>Gráfico de Chuva</h2>
-                    <div class="chart-container">
+                    <div class="chart-container-chuva">
                         <canvas id="rainChart"></canvas> <!-- Canvas para o gráfico -->
                     </div>
                 </div>
@@ -181,10 +201,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+    // Grafico de Chuva
+    document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('rainChart').getContext('2d');
 
-    const rainChart = new Chart(ctx, {
+const rainChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: {{ chart_labels|safe }},  // Labels formatadas como 'YYYY-MM-DD'
@@ -217,7 +238,6 @@
         }
     });
 });
-
 
 
 

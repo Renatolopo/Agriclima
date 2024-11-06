@@ -61,3 +61,129 @@ body {
 .content {
     width: 75%;
 }
+
+
+/*  ----------- */
+.container {
+    display: flex;
+    font-family: Arial, sans-serif;
+}
+.file-list {
+    width: 25%;
+    padding: 20px;
+    background-color: #f7f7f7;
+    border-right: 1px solid #ddd;
+}
+.file-list h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: #333;
+}
+.file-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+.file-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+.file-list li a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+}
+.file-list li button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+.file-list li button:hover {
+    background-color: #218838;
+}
+.content {
+    width: 75%;
+    padding: 20px;
+}
+.csv-table-container {
+    overflow-x: auto;
+}
+.csv-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+.csv-table th, .csv-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+.csv-table th {
+    background-color: #f2f2f2;
+    text-align: left;
+}
+.file-name-header {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.summary-box {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+.summary-item {
+    font-size: 16px;
+}
+.container {
+    display: flex;
+    font-family: Arial, sans-serif;
+}
+.content {
+    width: 75%;
+    padding: 20px;
+}
+.csv-table-container {
+    overflow-x: auto;
+}
+.csv-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+.chart-container-chuva {
+    width: 100%;
+    max-width: 1000px;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.chart-container-chuva canvas {
+    min-width: 800px;
+    width: 1500px;
+    height: 400px;
+}
+
+/* Novo estilo para os gráficos de registros e dados faltantes */
+.chart-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    max-width: 600px; /* Limita a largura total do container */
+}
+
+.chart-box {
+    width: 45%; /* Cada gráfico ocupa 45% da largura */
+}
+
+canvas {
+    width: 100%;  /* Ocupa toda a largura da caixa */
+    height: 200px; /* Reduz a altura dos gráficos */
+}
