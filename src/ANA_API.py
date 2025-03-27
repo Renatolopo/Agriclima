@@ -3,10 +3,13 @@ import zipfile
 import io
 import os
 import time
+
+# "tokenautenticacao": "eyJhbGciOiJIUzUxMiJ9.eyJleHAiOjE3MzM1NzY1NzcsImlhdCI6MTczMzU3NTk3N30.nnGFMQLBl0x552XfWyXKrC2_p3QMrqePvUQq-Au2c6Nlo0EAzqji8JXJxotsycEiVAB0jU6kRADLhI4su5CBTA",
+
 def download_station_data(codigo_estacao, diretorio_saida, max_retries=5, backoff_factor=1):
     url = 'https://www.snirh.gov.br/hidroweb/rest/api/documento/download/files'
     
-    token = 'eyJhbGciOiJIUzUxMiJ9.eyJleHAiOjE3MjQxNzQyNjUsImlhdCI6MTcyNDE3MzY2NX0.3w5QBAoZqSn8PSNrdlqDq8Pd_ML7D9Blm1cuyp3oLH9cKc9GgpZRsatq1RMS2M7CNObK-BSWuIKWC3U19PTn7Q'
+    token = 'eyJhbGciOiJIUzUxMiJ9.eyJleHAiOjE3MzM1NzY1NzcsImlhdCI6MTczMzU3NTk3N30.nnGFMQLBl0x552XfWyXKrC2_p3QMrqePvUQq-Au2c6Nlo0EAzqji8JXJxotsycEiVAB0jU6kRADLhI4su5CBTA'
     
     headers = {
         'Authorization': f'Bearer {token}',
